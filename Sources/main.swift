@@ -1,7 +1,7 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 
-struct Piece {
+struct Piece: CustomStringConvertible {
     var color: String
     var value: Int
 
@@ -9,9 +9,13 @@ struct Piece {
         self.color = color
         self.value = value
     }
+
+    var description: String {
+      return "Color: \(color), Value: \(value)"
+    }
 }
 
-struct BetPlacement {
+struct BetPlacement: CustomStringConvertible {
   var odds: Float
   var payout: Float
   var affectedPieces: [Piece] = []
@@ -22,6 +26,14 @@ struct BetPlacement {
         self.affectedPieces = affectedPieces
     }
 
+  var description: String {
+    var descriptionString: String = "{\n  Odds: \(odds),\n  Payout: \(payout),\n  affectedPieces: {\n"
+    for piece: Piece in affectedPieces {
+      descriptionString = descriptionString + "    {Color: \(piece.color), Value: \(piece.value)},\n"
+    }
+    descriptionString = descriptionString.dropLast().dropLast() + "\n  }\n}"
+    return descriptionString
+  }
 }
 
 let redNumbers: [Int] = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
@@ -84,16 +96,16 @@ for i: Int in 1...36 { // loop through rows
   let hasLeft: Bool = pieces.contains { $0.value == (i - 1) && i % 3 == 0 }
   let hasDown: Bool = pieces.contains { $0.value == (i + 3) && i < 34 }
   let hasCorner: Bool = pieces.contains {$0.value == (i + 4) && i % 3 > 0 }
-  let hasLine: Bool = pieces.contains{ $0.value == (i + 4) && i % 3 == 1 }
+  let hasLine: Bool = pieces.contains{ $0.value == (i + 4) && i % 3 == 1 && i < 34 }
   let hasSetOf12: Bool = pieces.contains{ $0.value == (i + 11) && i % 12 == 1 }
   let hasSetOf18: Bool = pieces.contains{ $0.value == (i + 17) && i % 18 == 1 }
 
-  let hasFirstColumn: Bool = i % 3 == 0 
-  let hasSecondColumn: Bool = i % 3 == 1
+  let hasFirstColumn: Bool = i % 3 == 0
+  let hasSecondColumn: Bool = i % 3 == 1 
   let hasThirdColumn: Bool = i % 3 == 2
 
-  let isRed: Bool = pieces.contains{ $0.color == "red" }
-  let isBlack: Bool = pieces.contains{ $0.color == "black" }
+  let isRed: Bool = redNumbers.contains{ $0 == i }
+  let isBlack: Bool = blackNumbers.contains{ $0 == i }
 
   let isOdd: Bool = i % 2 == 1
   let isEven: Bool = i % 2 == 0
@@ -162,46 +174,6 @@ betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: 
 betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: oddPieces))
 betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: evenPieces))
 
-// for bet in betPlacements {
-//     print(bet.affectedPieces)
-// }
-
-// for bet: BetPlacement in betPlacements {
-//   for piece: Piece in bet.affectedPieces {
-//     print(piece.value, terminator: " ")
-//   }
-//   print(bet.affectedPieces)
-// }
-
-// for i: Int in 1...36 {
-
-//   if (i % 3 == 1) { // piece is on the left side
-//     pieces[i].neighboringPieces.append(pieces[i + 1])
-//   } else if (i % 3 == 0) {
-//     pieces[i].neighboringPieces.append(pieces[i - 1])
-//   } else {
-//     pieces[i].neighboringPieces.append(pieces[i + 1])
-//     pieces[i].neighboringPieces.append(pieces[i - 1])
-//   }
-//   if (i < 4) { // check if i is on top
-//     if (i == 1) {
-//       pieces[i].neighboringPieces.append(pieces[37])
-//     } else if (i == 3) {
-//       pieces[i].neighboringPieces.append(pieces[38])
-//     } else {
-//       pieces[i].neighboringPieces.append(pieces[37])
-//       pieces[i].neighboringPieces.append(pieces[38])
-//     }
-//     pieces[i].neighboringPieces.append(pieces[i + 3])
-//   } else if (i > 33) { // check if i is on the bottom
-//     pieces[i].neighboringPieces.append(pieces[i - 3])
-//   } else { // i is in the middle
-//     pieces[i].neighboringPieces.append(pieces[i + 3])
-//     pieces[i].neighboringPieces.append(pieces[i - 3])
-//   }
-// } 
-
-
-
-
-
+for bet: BetPlacement in betPlacements {
+  print(bet)
+}
