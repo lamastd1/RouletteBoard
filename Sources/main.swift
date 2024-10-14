@@ -17,10 +17,10 @@ struct Piece: CustomStringConvertible {
 
 struct BetPlacement: CustomStringConvertible {
   var odds: Float
-  var payout: Float
+  var payout: Int
   var affectedPieces: [Piece] = []
 
-  init(odds: Float, payout: Float, affectedPieces: [Piece]) {
+  init(odds: Float, payout: Int, affectedPieces: [Piece]) {
         self.odds = odds
         self.payout = payout
         self.affectedPieces = affectedPieces
@@ -38,8 +38,6 @@ struct BetPlacement: CustomStringConvertible {
 
 let redNumbers: [Int] = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
 let blackNumbers: [Int] = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35]
-let doubleZero: Int = 38
-let singleZero: Int = 37
 
 var pieces: [Piece] = []
 pieces.append(Piece(color: "other", value: -1))
@@ -174,6 +172,14 @@ betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: 
 betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: oddPieces))
 betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: evenPieces))
 
+
+// TESTING BOARD 
+let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (3, 12), (7, 5), (6, 6), (9, 4), (12, 3), (18, 2), (36, 1)])
+
+print("Checking for failed bets")
 for bet: BetPlacement in betPlacements {
-  print(bet)
+  if (lengthsPerPayout[bet.payout] != bet.affectedPieces.count) {
+    print("Failed bets")
+    print(bet)
+  }
 }
