@@ -16,22 +16,25 @@ struct Piece: CustomStringConvertible {
 }
 
 struct BetPlacement: CustomStringConvertible {
+
   var odds: Float
   var payout: Int
   var affectedPieces: [Piece] = []
+  var amountBet: Int
 
   init(odds: Float, payout: Int, affectedPieces: [Piece]) {
-        self.odds = odds
-        self.payout = payout
-        self.affectedPieces = affectedPieces
-    }
+      self.odds = odds
+      self.payout = payout
+      self.affectedPieces = affectedPieces
+      self.amountBet = 0
+  }
 
   var description: String {
     var descriptionString: String = "{\n  Odds: \(odds),\n  Payout: \(payout),\n  affectedPieces: {\n"
     for piece: Piece in affectedPieces {
       descriptionString = descriptionString + "    {Color: \(piece.color), Value: \(piece.value)},\n"
     }
-    descriptionString = descriptionString.dropLast().dropLast() + "\n  }\n}"
+    descriptionString = descriptionString.dropLast().dropLast() + "\n  Amount Bet: \(amountBet)  }\n}"
     return descriptionString
   }
 }
@@ -176,10 +179,31 @@ betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: 
 // TESTING BOARD 
 let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (3, 12), (7, 5), (6, 6), (9, 4), (12, 3), (18, 2), (36, 1)])
 
-print("Checking for failed bets")
-for bet: BetPlacement in betPlacements {
-  if (lengthsPerPayout[bet.payout] != bet.affectedPieces.count) {
-    print("Failed bets")
-    print(bet)
+// print("Checking for failed bets")
+// for bet: BetPlacement in betPlacements {
+//   if (lengthsPerPayout[bet.payout] != bet.affectedPieces.count) {
+//     print("Failed bets")
+//     print(bet)
+//   }
+// }
+
+var fibonacci: Fibonacci = Fibonacci(bets: [], increaseOnWin: false)
+
+for _ in 1...100 {
+
+  fibonacci.makeBet()
+
+  let spinNumber: Int = Int.random(in: 1...38)
+  var spinPiece: Piece? 
+  if pieces.contains(where: {
+    if $0.value == spinNumber {
+      spinPiece = $0 
+      return true
+    }
+    return false
+  }) {
+    if let piece: Piece = spinPiece {
+      print("\(piece)")
+    }
   }
 }
