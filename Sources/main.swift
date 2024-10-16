@@ -22,11 +22,11 @@ struct BetPlacement: CustomStringConvertible {
   var affectedPieces: [Piece] = []
   var amountBet: Int
 
-  init(odds: Float, payout: Int, affectedPieces: [Piece]) {
+  init(odds: Float, payout: Int, affectedPieces: [Piece], amountBet: Int = 0) {
       self.odds = odds
       self.payout = payout
       self.affectedPieces = affectedPieces
-      self.amountBet = 0
+      self.amountBet = amountBet
   }
 
   var description: String {
@@ -187,14 +187,15 @@ let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (
 //   }
 // }
 
-var fibonacci: Fibonacci = Fibonacci(bets: [], increaseOnWin: false)
+var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
+var fibonacciSimulation: [Fibonacci] = []
 
 for _ in 1...100 {
 
   fibonacci.makeBet()
 
   let spinNumber: Int = Int.random(in: 1...38)
-  var spinPiece: Piece? 
+  var spinPiece: Piece?
   if pieces.contains(where: {
     if $0.value == spinNumber {
       spinPiece = $0 
@@ -203,7 +204,21 @@ for _ in 1...100 {
     return false
   }) {
     if let piece: Piece = spinPiece {
-      print("\(piece)")
+      if (fibonacci.rounds.count > 0) {
+        if ( fibonacci.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
+          fibonacci.profit = fibonacci.profit + ( fibonacci.rounds.last!.bet.amountBet * ( fibonacci.rounds.last!.bet.payout - 1))
+          fibonacci.wallet = fibonacci.wallet +  fibonacci.rounds.last!.bet.amountBet
+          fibonacci.rounds[fibonacci.rounds.count - 1].outcome = true
+        } else { // check if the game is over
+          if (fibonacci.wallet <= 0) {
+            fibonacciSimulation.append(fibonacci)
+            print(fibonacci.description())
+            break;
+          }
+        }
+      } 
     }
   }
+  fibonacciSimulation.append(fibonacci)
+  print(fibonacci.description())
 }
