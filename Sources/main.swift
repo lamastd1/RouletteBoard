@@ -210,9 +210,11 @@ let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (
 var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
 var fibonacciSimulation: [Fibonacci] = []
 
-for i: Int in 1...100 {
+var count: Int = 1 
 
-  fibonacci.makeBet(roundNumber: i)
+while(fibonacci.wallet > 0) {
+
+  fibonacci.makeBet(roundNumber: count)
 
   let spinNumber: Int = Int.random(in: 1...38)
   var spinPiece: Piece?
@@ -241,6 +243,7 @@ for i: Int in 1...100 {
   }
   fibonacciSimulation.append(fibonacci)
   print(fibonacci.description())
+  count = count + 1
 }
 
 let csvWriter: CSVWriter = CSVWriter()
