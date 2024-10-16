@@ -210,9 +210,9 @@ let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (
 var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
 var fibonacciSimulation: [Fibonacci] = []
 
-for _ in 1...100 {
+for i: Int in 1...100 {
 
-  fibonacci.makeBet()
+  fibonacci.makeBet(roundNumber: i)
 
   let spinNumber: Int = Int.random(in: 1...38)
   var spinPiece: Piece?

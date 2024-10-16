@@ -4,9 +4,9 @@ class Fibonacci: Strategy {
   let startingFibonacciNum2: Int = 3
 
   override func description() -> String {
-    return ("wallet: \(self.wallet), profit: \(self.profit), outcome: \(self.rounds.last!.outcome), amount bet: \(self.rounds.last!.bet.amountBet)")
+    return ("round number: \(self.rounds.last!.roundNumber), wallet: \(self.wallet), profit: \(self.profit), outcome: \(self.rounds.last!.outcome), amount bet: \(self.rounds.last!.bet.amountBet)")
   }
-  override func makeBet() {
+  override func makeBet(roundNumber: Int) {
 
     var nextFibonacciNumber: Int
 
@@ -29,10 +29,11 @@ class Fibonacci: Strategy {
     let usableBets: [BetPlacement] = betPlacements.filter { $0.name == "reds" }
 
     if !usableBets.isEmpty {
-      var bet: BetPlacement = usableBets[0]
-      bet.amountBet = nextFibonacciNumber
-      self.rounds.append(Round(bet: bet, outcome: false))
-      self.wallet = self.wallet - nextFibonacciNumber
+      for var bet: BetPlacement in usableBets {
+        bet.amountBet = nextFibonacciNumber
+        self.rounds.append(Round(roundNumber: roundNumber, bet: bet, outcome: false))
+        self.wallet = self.wallet - nextFibonacciNumber
+      }
     }
   }
 

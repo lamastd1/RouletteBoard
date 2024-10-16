@@ -1,10 +1,12 @@
 class Strategy {
 
   struct Round {
+    var roundNumber: Int
     var bet: BetPlacement 
     var outcome: Bool
 
-    init(bet: BetPlacement, outcome: Bool) {
+    init(roundNumber: Int = 0, bet: BetPlacement, outcome: Bool) {
+        self.roundNumber = roundNumber
         self.bet = bet
         self.outcome = outcome
     }
@@ -23,7 +25,7 @@ class Strategy {
     self.increaseOnWin = increaseOnWin
   }
 
-  func makeBet() {
+  func makeBet(roundNumber: Int) {
     
   }
 
