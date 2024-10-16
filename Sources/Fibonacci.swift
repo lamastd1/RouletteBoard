@@ -25,7 +25,7 @@ class Fibonacci: Strategy {
       nextFibonacciNumber = generateNextFibonacci(num1: currentFibonacciNum1, num2: currentFibonacciNum2)
 
     }
-    self.rounds.append(Round(bet: BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: redPieces, amountBet: nextFibonacciNumber), outcome: false))
+    self.rounds.append(Round(bet: BetPlacement(name: "temp", odds: (18 / 38), payout: (2), affectedPieces: redPieces, amountBet: nextFibonacciNumber), outcome: false))
     self.wallet = self.wallet - nextFibonacciNumber
   }
 

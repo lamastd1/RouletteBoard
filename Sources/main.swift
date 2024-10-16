@@ -17,20 +17,22 @@ struct Piece: CustomStringConvertible {
 
 struct BetPlacement: CustomStringConvertible {
 
+  var name: String
   var odds: Float
   var payout: Int
   var affectedPieces: [Piece] = []
   var amountBet: Int
 
-  init(odds: Float, payout: Int, affectedPieces: [Piece], amountBet: Int = 0) {
-      self.odds = odds
-      self.payout = payout
-      self.affectedPieces = affectedPieces
-      self.amountBet = amountBet
+  init(name: String, odds: Float, payout: Int, affectedPieces: [Piece], amountBet: Int = 0) {
+    self.name = name
+    self.odds = odds
+    self.payout = payout
+    self.affectedPieces = affectedPieces
+    self.amountBet = amountBet
   }
 
   var description: String {
-    var descriptionString: String = "{\n  Odds: \(odds),\n  Payout: \(payout),\n  affectedPieces: {\n"
+    var descriptionString: String = "{\n  Name: \(name),\n Odds: \(odds),\n  Payout: \(payout),\n  affectedPieces: {\n"
     for piece: Piece in affectedPieces {
       descriptionString = descriptionString + "    {Color: \(piece.color), Value: \(piece.value)},\n"
     }
@@ -63,23 +65,23 @@ for i: Int in 1...38 {
 
 // make each single bet 
 for i: Int in 1...38 {
-  betPlacements.append(BetPlacement(odds: (1 / 38), payout: (36), affectedPieces: [pieces[i]]))
+  betPlacements.append(BetPlacement(name: "\(i)", odds: (1 / 38), payout: (36), affectedPieces: [pieces[i]]))
 }
 
 // single and double 0
 // make double bets 
-betPlacements.append(BetPlacement(odds: (2 / 38), payout: (18), affectedPieces: [pieces[37], pieces[38]])) // single and double 0
-betPlacements.append(BetPlacement(odds: (2 / 38), payout: (18), affectedPieces: [pieces[1], pieces[2]]))
-betPlacements.append(BetPlacement(odds: (2 / 38), payout: (18), affectedPieces: [pieces[2], pieces[3]]))  
+betPlacements.append(BetPlacement(name: "0-00", odds: (2 / 38), payout: (18), affectedPieces: [pieces[37], pieces[38]])) // single and double 0
+betPlacements.append(BetPlacement(name: "1-2", odds: (2 / 38), payout: (18), affectedPieces: [pieces[1], pieces[2]]))
+betPlacements.append(BetPlacement(name: "2-3", odds: (2 / 38), payout: (18), affectedPieces: [pieces[2], pieces[3]]))  
 
 
 // make triple bets
-betPlacements.append(BetPlacement(odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[1], pieces[2]])) // single 0, 1, 2
-betPlacements.append(BetPlacement(odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[38], pieces[2]])) // single 0, double 0, 2
-betPlacements.append(BetPlacement(odds: (3 / 38), payout: (12), affectedPieces: [pieces[38], pieces[2], pieces[3]])) // double 0, 2, 3
+betPlacements.append(BetPlacement(name: "0-1-2", odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[1], pieces[2]])) // single 0, 1, 2
+betPlacements.append(BetPlacement(name: "0-00-2", odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[38], pieces[2]])) // single 0, double 0, 2
+betPlacements.append(BetPlacement(name: "00-2-3", odds: (3 / 38), payout: (12), affectedPieces: [pieces[38], pieces[2], pieces[3]])) // double 0, 2, 3
 
 // make five bets
-betPlacements.append(BetPlacement(odds: (5 / 38), payout: (7), affectedPieces: [pieces[37], pieces[38], pieces[1], pieces[2], pieces[3]])) // double 0, 2, 3
+betPlacements.append(BetPlacement(name: "0-00-1-2-3", odds: (5 / 38), payout: (7), affectedPieces: [pieces[37], pieces[38], pieces[1], pieces[2], pieces[3]])) // double 0, 2, 3
 
 var firstColumnPieces: [Piece] = []
 var secondColumnPieces: [Piece] = []
@@ -112,38 +114,56 @@ for i: Int in 1...36 { // loop through rows
   let isEven: Bool = i % 2 == 0
 
   if (hasRightAndStreet) { // get right side and middle bets
-    betPlacements.append(BetPlacement(odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 1]]))
-    betPlacements.append(BetPlacement(odds: (3 / 38), payout: (12), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 2]]))
+    betPlacements.append(BetPlacement(name: "\(i)-\(i + 1)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 1]]))
+    betPlacements.append(BetPlacement(name: "\(i)-\(i + 1)-\(i + 2)", odds: (3 / 38), payout: (12), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 2]]))
   } 
   if (hasLeft) { // get left side and middle bets
-    betPlacements.append(BetPlacement(odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i - 1]]))
+    betPlacements.append(BetPlacement(name: "\(i)-\(i - 1)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i - 1]]))
   }
   if (hasDown) {
-    betPlacements.append(BetPlacement(odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 3]]))
+    betPlacements.append(BetPlacement(name: "\(i)-\(i + 3)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 3]]))
   }
   if (hasCorner) {
-    betPlacements.append(BetPlacement(odds: (4 / 38), payout: (9), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 3], pieces[i + 4]]))
+    betPlacements.append(BetPlacement(name: "\(i)-\(i + 1)-\(i + 3)-\(i + 4)", odds: (4 / 38), payout: (9), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 3], pieces[i + 4]]))
   }
   if (hasLine) {
     var currBetPlacements: [Piece] = []
+    var nameString: String = "\(i)"
     for j: Int in i...(i + 5) {
       currBetPlacements.append(pieces[j])
+      if (j != i) {
+        nameString = nameString + "-\(j)"
+      }
     }
-    betPlacements.append(BetPlacement(odds: (6 / 38), payout: (6), affectedPieces: currBetPlacements))
+    betPlacements.append(BetPlacement(name: nameString, odds: (6 / 38), payout: (6), affectedPieces: currBetPlacements))
   }
   if (hasSetOf12) {
     var currBetPlacements: [Piece] = []
+    var nameString: String = ""
+    if (i < 6) {
+      nameString = "lowerThird"
+    } else if (i < 18) {
+      nameString = "middleThird"
+    } else {
+      nameString = "upperThird"
+    }
     for j: Int in i...(i + 11) {
       currBetPlacements.append(pieces[j])
     }
-    betPlacements.append(BetPlacement(odds: (12 / 38), payout: (3), affectedPieces: currBetPlacements))
+    betPlacements.append(BetPlacement(name: nameString, odds: (12 / 38), payout: (3), affectedPieces: currBetPlacements))
   } 
   if (hasSetOf18) {
     var currBetPlacements: [Piece] = []
+    var nameString: String = ""
+    if (i < 15) {
+      nameString = "lowerHalf"
+    } else {
+      nameString = "upperHalf"
+    }
     for j: Int in i...(i + 17) {
       currBetPlacements.append(pieces[j])
     }
-    betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: currBetPlacements))
+    betPlacements.append(BetPlacement(name: nameString, odds: (18 / 38), payout: (2), affectedPieces: currBetPlacements))
   }
   if (isRed) {
     redPieces.append(pieces[i])
@@ -165,15 +185,15 @@ for i: Int in 1...36 { // loop through rows
 }
 
 // add extra bets you had to count gradually
-betPlacements.append(BetPlacement(odds: (12 / 38), payout: (3), affectedPieces: firstColumnPieces))
-betPlacements.append(BetPlacement(odds: (12 / 38), payout: (3), affectedPieces: secondColumnPieces))
-betPlacements.append(BetPlacement(odds: (12 / 38), payout: (3), affectedPieces: thirdColumnPieces))
+betPlacements.append(BetPlacement(name: "firstColumn", odds: (12 / 38), payout: (3), affectedPieces: firstColumnPieces))
+betPlacements.append(BetPlacement(name: "secondColumn", odds: (12 / 38), payout: (3), affectedPieces: secondColumnPieces))
+betPlacements.append(BetPlacement(name: "thirdColumn", odds: (12 / 38), payout: (3), affectedPieces: thirdColumnPieces))
 
-betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: redPieces))
-betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: blackPieces))
+betPlacements.append(BetPlacement(name: "reds", odds: (18 / 38), payout: (2), affectedPieces: redPieces))
+betPlacements.append(BetPlacement(name: "blacks", odds: (18 / 38), payout: (2), affectedPieces: blackPieces))
 
-betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: oddPieces))
-betPlacements.append(BetPlacement(odds: (18 / 38), payout: (2), affectedPieces: evenPieces))
+betPlacements.append(BetPlacement(name: "odds", odds: (18 / 38), payout: (2), affectedPieces: oddPieces))
+betPlacements.append(BetPlacement(name: "evens", odds: (18 / 38), payout: (2), affectedPieces: evenPieces))
 
 
 // TESTING BOARD 
@@ -232,3 +252,5 @@ let boardCsv: String = csvWriter.createCSV(from: pieces, using: boardHeaders) { 
 csvWriter.writeCSV(to: "board.csv", content: boardCsv)
 
 let fibonacciHeaders: [String] = ["rounds", "profit", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "0", "00"]
+
+print(betPlacements.description)
