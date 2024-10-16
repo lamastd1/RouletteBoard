@@ -25,8 +25,15 @@ class Fibonacci: Strategy {
       nextFibonacciNumber = generateNextFibonacci(num1: currentFibonacciNum1, num2: currentFibonacciNum2)
 
     }
-    self.rounds.append(Round(bet: BetPlacement(name: "temp", odds: (18 / 38), payout: (2), affectedPieces: redPieces, amountBet: nextFibonacciNumber), outcome: false))
-    self.wallet = self.wallet - nextFibonacciNumber
+    
+    let usableBets: [BetPlacement] = betPlacements.filter { $0.name == "reds" }
+
+    if !usableBets.isEmpty {
+      var bet: BetPlacement = usableBets[0]
+      bet.amountBet = nextFibonacciNumber
+      self.rounds.append(Round(bet: bet, outcome: false))
+      self.wallet = self.wallet - nextFibonacciNumber
+    }
   }
 
   func generateNextFibonacci(num1: Int, num2: Int) -> Int {
