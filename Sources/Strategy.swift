@@ -1,5 +1,6 @@
 class Strategy {
 
+  var gameNumber: Int
   struct Round {
     var roundNumber: Int
     var bet: BetPlacement 
@@ -17,7 +18,8 @@ class Strategy {
   var profit: Int
   var increaseOnWin: Bool
 
-  init(rounds: [Round], wallet: Int = 500, profit: Int = 0, increaseOnWin: Bool) {
+  init(gameNumber :Int, rounds: [Round], wallet: Int = 500, profit: Int = 0, increaseOnWin: Bool) {
+    self.gameNumber = gameNumber
     self.rounds = rounds
     self.startingWallet = wallet
     self.wallet = wallet

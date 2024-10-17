@@ -15,6 +15,20 @@ struct Piece: CustomStringConvertible {
     }
 }
 
+struct Game: CustomStringConvertible {
+  var gameNum: Int
+  var piece: Piece
+
+  init(gameNum: Int, piece: Piece) {
+    self.gameNum = gameNum
+    self.piece = piece
+  }
+
+  var description: String {
+    return "Game Num: \(gameNum), Color: \(piece.color) Value: \(piece.value)"
+  }
+}
+
 struct BetPlacement: CustomStringConvertible {
 
   var name: String
@@ -207,43 +221,48 @@ let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (
 //   }
 // }
 
-var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
+// var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
 var fibonacciSimulation: [Fibonacci] = []
+var gamePieces: [Game] = []
 
-var count: Int = 1 
+for gameCount: Int in 1...3 {
 
-while(fibonacci.wallet > 0) {
+  var roundCount: Int = 1 
+  var fibonacci: Fibonacci? = Fibonacci(gameNumber: 0, rounds: [], increaseOnWin: false)
 
-  fibonacci.makeBet(roundNumber: count)
+  while(fibonacci!.wallet > 0) {
 
-  let spinNumber: Int = Int.random(in: 1...38)
-  var spinPiece: Piece?
-  if pieces.contains(where: {
-    if $0.value == spinNumber {
-      spinPiece = $0 
-      return true
-    }
-    return false
-  }) {
-    if let piece: Piece = spinPiece {
-      if (fibonacci.rounds.count > 0) {
-        if ( fibonacci.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
-          fibonacci.profit = fibonacci.profit + ( fibonacci.rounds.last!.bet.amountBet * ( fibonacci.rounds.last!.bet.payout - 1))
-          fibonacci.wallet = fibonacci.wallet +  fibonacci.rounds.last!.bet.amountBet
-          fibonacci.rounds[fibonacci.rounds.count - 1].outcome = true
-        } else { // check if the game is over
-          if (fibonacci.wallet <= 0) {
-            fibonacciSimulation.append(fibonacci)
-            print(fibonacci.description())
-            break;
+    fibonacci!.makeBet(roundNumber: roundCount)
+
+    let spinNumber: Int = Int.random(in: 1...38)
+    var spinPiece: Piece?
+    if pieces.contains(where: {
+      if $0.value == spinNumber {
+        spinPiece = $0 
+        return true
+      }
+      return false
+    }) {
+      if let piece: Piece = spinPiece {
+        if (fibonacci!.rounds.count > 0) {
+          if ( fibonacci!.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
+            fibonacci!.profit = fibonacci!.profit + ( fibonacci!.rounds.last!.bet.amountBet * ( fibonacci!.rounds.last!.bet.payout - 1))
+            fibonacci!.wallet = fibonacci!.wallet +  fibonacci!.rounds.last!.bet.amountBet
+            fibonacci!.rounds[fibonacci!.rounds.count - 1].outcome = true
+            fibonacci!.gameNumber = gameCount
           }
-        }
-      } 
+        } 
+      }
     }
+    gamePieces.append(Game(gameNum: gameCount, piece: spinPiece!))
+    roundCount = roundCount + 1
   }
-  fibonacciSimulation.append(fibonacci)
-  print(fibonacci.description())
-  count = count + 1
+  fibonacciSimulation.append(fibonacci!)
+  fibonacci = nil
+}
+
+for f: Fibonacci in fibonacciSimulation {
+  print(f.description())
 }
 
 let csvWriter: CSVWriter = CSVWriter()
@@ -260,5 +279,16 @@ let betCsv: String = csvWriter.createCSV(from: betPlacements, using: betHeaders)
 }
 csvWriter.writeCSV(to: "bet.csv", content: betCsv)
 
-let fibonacciHeaders: [String] = ["rounds", "profit", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "0", "00"]
+let gameHeaders: [String] = ["value", "color"]
+let gameCsv: String = csvWriter.createCSV(from: gamePieces, using: gameHeaders) { game in
+  return ["\(game.gameNum)", "\(game.piece.value)", game.piece.color]
+}
+csvWriter.writeCSV(to: "game.csv", content: gameCsv)
+
+let fibonacciHeaders: [String] = ["rounds", "profit"]
+let fibonacciCsv: String = csvWriter.createCSV(from: fibonacciSimulation, using: fibonacciHeaders) { fibonacci in
+  return ["\(fibonacci.gameNumber)", "\(fibonacci.profit - fibonacci.startingWallet)"]
+}
+
+csvWriter.writeCSV(to: "fibonacci.csv", content: fibonacciCsv)
 
