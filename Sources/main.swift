@@ -1,35 +1,21 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
 
-struct Piece: CustomStringConvertible {
-    var color: String
-    var value: Int
+struct Round {
+  var roundNumber: Int
+  var piece: Piece 
 
-    init(color: String, value: Int) {
-        self.color = color
-        self.value = value
-    }
-
-    var description: String {
-      return "Color: \(color), Value: \(value)"
-    }
-}
-
-struct Game: CustomStringConvertible {
-  var gameNum: Int
-  var piece: Piece
-
-  init(gameNum: Int, piece: Piece) {
-    self.gameNum = gameNum
+  init(roundNumber: Int = 0, piece: Piece) {
+    self.roundNumber = roundNumber
     self.piece = piece
   }
 
   var description: String {
-    return "Game Num: \(gameNum), Color: \(piece.color) Value: \(piece.value)"
+    return "Round Number: \(roundNumber), Color: \(piece.color) Value: \(piece.value)"
   }
 }
 
-struct BetPlacement: CustomStringConvertible {
+struct Bet: CustomStringConvertible {
 
   var name: String
   var odds: Float
@@ -55,13 +41,27 @@ struct BetPlacement: CustomStringConvertible {
   }
 }
 
+struct Piece: CustomStringConvertible {
+    var color: String
+    var value: Int
+
+    init(color: String, value: Int) {
+        self.color = color
+        self.value = value
+    }
+
+    var description: String {
+      return "Color: \(color), Value: \(value)"
+    }
+}
+
 let redNumbers: [Int] = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
 let blackNumbers: [Int] = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35]
 
 var pieces: [Piece] = []
 pieces.append(Piece(color: "other", value: -1))
 
-var betPlacements: [BetPlacement] = []
+var betPlacements: [Bet] = []
 
 // make 0 = 37 and 00 = 38
 for i: Int in 1...38 {
@@ -79,23 +79,23 @@ for i: Int in 1...38 {
 
 // make each single bet 
 for i: Int in 1...38 {
-  betPlacements.append(BetPlacement(name: "\(i)", odds: (1 / 38), payout: (36), affectedPieces: [pieces[i]]))
+  betPlacements.append(Bet(name: "\(i)", odds: (1 / 38), payout: (36), affectedPieces: [pieces[i]]))
 }
 
 // single and double 0
 // make double bets 
-betPlacements.append(BetPlacement(name: "0-00", odds: (2 / 38), payout: (18), affectedPieces: [pieces[37], pieces[38]])) // single and double 0
-betPlacements.append(BetPlacement(name: "1-2", odds: (2 / 38), payout: (18), affectedPieces: [pieces[1], pieces[2]]))
-betPlacements.append(BetPlacement(name: "2-3", odds: (2 / 38), payout: (18), affectedPieces: [pieces[2], pieces[3]]))  
+betPlacements.append(Bet(name: "0-00", odds: (2 / 38), payout: (18), affectedPieces: [pieces[37], pieces[38]])) // single and double 0
+betPlacements.append(Bet(name: "1-2", odds: (2 / 38), payout: (18), affectedPieces: [pieces[1], pieces[2]]))
+betPlacements.append(Bet(name: "2-3", odds: (2 / 38), payout: (18), affectedPieces: [pieces[2], pieces[3]]))  
 
 
 // make triple bets
-betPlacements.append(BetPlacement(name: "0-1-2", odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[1], pieces[2]])) // single 0, 1, 2
-betPlacements.append(BetPlacement(name: "0-00-2", odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[38], pieces[2]])) // single 0, double 0, 2
-betPlacements.append(BetPlacement(name: "00-2-3", odds: (3 / 38), payout: (12), affectedPieces: [pieces[38], pieces[2], pieces[3]])) // double 0, 2, 3
+betPlacements.append(Bet(name: "0-1-2", odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[1], pieces[2]])) // single 0, 1, 2
+betPlacements.append(Bet(name: "0-00-2", odds: (3 / 38), payout: (12), affectedPieces: [pieces[37], pieces[38], pieces[2]])) // single 0, double 0, 2
+betPlacements.append(Bet(name: "00-2-3", odds: (3 / 38), payout: (12), affectedPieces: [pieces[38], pieces[2], pieces[3]])) // double 0, 2, 3
 
 // make five bets
-betPlacements.append(BetPlacement(name: "0-00-1-2-3", odds: (5 / 38), payout: (7), affectedPieces: [pieces[37], pieces[38], pieces[1], pieces[2], pieces[3]])) // double 0, 2, 3
+betPlacements.append(Bet(name: "0-00-1-2-3", odds: (5 / 38), payout: (7), affectedPieces: [pieces[37], pieces[38], pieces[1], pieces[2], pieces[3]])) // double 0, 2, 3
 
 var firstColumnPieces: [Piece] = []
 var secondColumnPieces: [Piece] = []
@@ -128,17 +128,17 @@ for i: Int in 1...36 { // loop through rows
   let isEven: Bool = i % 2 == 0
 
   if (hasRightAndStreet) { // get right side and middle bets
-    betPlacements.append(BetPlacement(name: "\(i)-\(i + 1)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 1]]))
-    betPlacements.append(BetPlacement(name: "\(i)-\(i + 1)-\(i + 2)", odds: (3 / 38), payout: (12), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 2]]))
+    betPlacements.append(Bet(name: "\(i)-\(i + 1)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 1]]))
+    betPlacements.append(Bet(name: "\(i)-\(i + 1)-\(i + 2)", odds: (3 / 38), payout: (12), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 2]]))
   } 
   if (hasLeft) { // get left side and middle bets
-    betPlacements.append(BetPlacement(name: "\(i)-\(i - 1)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i - 1]]))
+    betPlacements.append(Bet(name: "\(i)-\(i - 1)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i - 1]]))
   }
   if (hasDown) {
-    betPlacements.append(BetPlacement(name: "\(i)-\(i + 3)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 3]]))
+    betPlacements.append(Bet(name: "\(i)-\(i + 3)", odds: (2 / 38), payout: (18), affectedPieces: [pieces[i], pieces[i + 3]]))
   }
   if (hasCorner) {
-    betPlacements.append(BetPlacement(name: "\(i)-\(i + 1)-\(i + 3)-\(i + 4)", odds: (4 / 38), payout: (9), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 3], pieces[i + 4]]))
+    betPlacements.append(Bet(name: "\(i)-\(i + 1)-\(i + 3)-\(i + 4)", odds: (4 / 38), payout: (9), affectedPieces: [pieces[i], pieces[i + 1], pieces[i + 3], pieces[i + 4]]))
   }
   if (hasLine) {
     var currBetPlacements: [Piece] = []
@@ -149,7 +149,7 @@ for i: Int in 1...36 { // loop through rows
         nameString = nameString + "-\(j)"
       }
     }
-    betPlacements.append(BetPlacement(name: nameString, odds: (6 / 38), payout: (6), affectedPieces: currBetPlacements))
+    betPlacements.append(Bet(name: nameString, odds: (6 / 38), payout: (6), affectedPieces: currBetPlacements))
   }
   if (hasSetOf12) {
     var currBetPlacements: [Piece] = []
@@ -164,7 +164,7 @@ for i: Int in 1...36 { // loop through rows
     for j: Int in i...(i + 11) {
       currBetPlacements.append(pieces[j])
     }
-    betPlacements.append(BetPlacement(name: nameString, odds: (12 / 38), payout: (3), affectedPieces: currBetPlacements))
+    betPlacements.append(Bet(name: nameString, odds: (12 / 38), payout: (3), affectedPieces: currBetPlacements))
   } 
   if (hasSetOf18) {
     var currBetPlacements: [Piece] = []
@@ -177,7 +177,7 @@ for i: Int in 1...36 { // loop through rows
     for j: Int in i...(i + 17) {
       currBetPlacements.append(pieces[j])
     }
-    betPlacements.append(BetPlacement(name: nameString, odds: (18 / 38), payout: (2), affectedPieces: currBetPlacements))
+    betPlacements.append(Bet(name: nameString, odds: (18 / 38), payout: (2), affectedPieces: currBetPlacements))
   }
   if (isRed) {
     redPieces.append(pieces[i])
@@ -199,22 +199,22 @@ for i: Int in 1...36 { // loop through rows
 }
 
 // add extra bets you had to count gradually
-betPlacements.append(BetPlacement(name: "firstColumn", odds: (12 / 38), payout: (3), affectedPieces: firstColumnPieces))
-betPlacements.append(BetPlacement(name: "secondColumn", odds: (12 / 38), payout: (3), affectedPieces: secondColumnPieces))
-betPlacements.append(BetPlacement(name: "thirdColumn", odds: (12 / 38), payout: (3), affectedPieces: thirdColumnPieces))
+betPlacements.append(Bet(name: "firstColumn", odds: (12 / 38), payout: (3), affectedPieces: firstColumnPieces))
+betPlacements.append(Bet(name: "secondColumn", odds: (12 / 38), payout: (3), affectedPieces: secondColumnPieces))
+betPlacements.append(Bet(name: "thirdColumn", odds: (12 / 38), payout: (3), affectedPieces: thirdColumnPieces))
 
-betPlacements.append(BetPlacement(name: "reds", odds: (18 / 38), payout: (2), affectedPieces: redPieces))
-betPlacements.append(BetPlacement(name: "blacks", odds: (18 / 38), payout: (2), affectedPieces: blackPieces))
+betPlacements.append(Bet(name: "reds", odds: (18 / 38), payout: (2), affectedPieces: redPieces))
+betPlacements.append(Bet(name: "blacks", odds: (18 / 38), payout: (2), affectedPieces: blackPieces))
 
-betPlacements.append(BetPlacement(name: "odds", odds: (18 / 38), payout: (2), affectedPieces: oddPieces))
-betPlacements.append(BetPlacement(name: "evens", odds: (18 / 38), payout: (2), affectedPieces: evenPieces))
+betPlacements.append(Bet(name: "odds", odds: (18 / 38), payout: (2), affectedPieces: oddPieces))
+betPlacements.append(Bet(name: "evens", odds: (18 / 38), payout: (2), affectedPieces: evenPieces))
 
 
 // TESTING BOARD 
 let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (3, 12), (7, 5), (6, 6), (9, 4), (12, 3), (18, 2), (36, 1)])
 
 // print("Checking for failed bets")
-// for bet: BetPlacement in betPlacements {
+// for bet: Bet in betPlacements {
 //   if (lengthsPerPayout[bet.payout] != bet.affectedPieces.count) {
 //     print("Failed bets")
 //     print(bet)
@@ -222,69 +222,61 @@ let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (
 // }
 
 // var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
-var fibonacciSimulation: [Fibonacci] = []
-var martingaleSimulation: [Martingale] = []
-var gamePieces: [Game] = []
+// var fibonacciSimulation: [Fibonacci] = []
+// var martingaleSimulation: [Martingale] = []
+var gamePieces: [Round] = []
 
-for gameCount: Int in 1...3 {
+var roundCount: Int = 1 
+// var fibonacci: Fibonacci? = Fibonacci(gameNumber: 0, rounds: [], increaseOnWin: false)
+// var martingale: Martingale? = Martingale(gameNumber: 0, rounds: [], increaseOnWin: false)
 
-  var roundCount: Int = 1 
-  var fibonacci: Fibonacci? = Fibonacci(gameNumber: 0, rounds: [], increaseOnWin: false)
-  var martingale: Martingale? = Martingale(gameNumber: 0, rounds: [], increaseOnWin: false)
+while(roundCount < 100 + 1) {
 
-  print(fibonacci!.startingWallet)
+  // if (fibonacci!.wallet > 0) {
+  //   fibonacci!.makeBet(roundNumber: roundCount)
+  // }
+  // if (martingale!.wallet > 0) {
+  //   martingale!.makeBet(roundNumber: roundCount)
+  // }
 
-
-  while(fibonacci!.wallet > 0 || martingale!.wallet > 0) {
-
-    if (fibonacci!.wallet > 0) {
-      fibonacci!.makeBet(roundNumber: roundCount)
+  let spinNumber: Int = Int.random(in: 1...38)
+  var spinPiece: Piece?
+  if pieces.contains(where: {
+    if $0.value == spinNumber {
+      spinPiece = $0 
+      return true
     }
-    if (martingale!.wallet > 0) {
-      martingale!.makeBet(roundNumber: roundCount)
+    return false
+  }) {
+    if let piece: Piece = spinPiece {
+      gamePieces.append(Round(roundNumber: roundCount, piece: piece))
+      roundCount = roundCount + 1
+    //   if (fibonacci!.wallet > 0 && fibonacci!.rounds.count > 0) {
+    //     if ( fibonacci!.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
+    //       fibonacci!.profit = fibonacci!.profit + ( fibonacci!.rounds.last!.bet.amountBet * ( fibonacci!.rounds.last!.bet.payout - 1))
+    //       fibonacci!.wallet = fibonacci!.wallet +  fibonacci!.rounds.last!.bet.amountBet
+    //       fibonacci!.rounds[fibonacci!.rounds.count - 1].outcome = true
+    //     }
+    //   } 
+    //   if (martingale!.wallet > 0 && martingale!.rounds.count > 0) {
+    //     if ( martingale!.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
+    //       martingale!.profit = martingale!.profit + ( martingale!.rounds.last!.bet.amountBet * ( martingale!.rounds.last!.bet.payout - 1))
+    //       martingale!.wallet = martingale!.wallet +  martingale!.rounds.last!.bet.amountBet
+    //       martingale!.rounds[martingale!.rounds.count - 1].outcome = true
+    //     }
+    //   } 
     }
-
-    let spinNumber: Int = Int.random(in: 1...38)
-    var spinPiece: Piece?
-    if pieces.contains(where: {
-      if $0.value == spinNumber {
-        spinPiece = $0 
-        return true
-      }
-      return false
-    }) {
-      if let piece: Piece = spinPiece {
-        if (fibonacci!.wallet > 0 && fibonacci!.rounds.count > 0) {
-          if ( fibonacci!.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
-            fibonacci!.profit = fibonacci!.profit + ( fibonacci!.rounds.last!.bet.amountBet * ( fibonacci!.rounds.last!.bet.payout - 1))
-            fibonacci!.wallet = fibonacci!.wallet +  fibonacci!.rounds.last!.bet.amountBet
-            fibonacci!.rounds[fibonacci!.rounds.count - 1].outcome = true
-            fibonacci!.gameNumber = gameCount
-          }
-        } 
-        if (martingale!.wallet > 0 && martingale!.rounds.count > 0) {
-          if ( martingale!.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
-            martingale!.profit = martingale!.profit + ( martingale!.rounds.last!.bet.amountBet * ( martingale!.rounds.last!.bet.payout - 1))
-            martingale!.wallet = martingale!.wallet +  martingale!.rounds.last!.bet.amountBet
-            martingale!.rounds[martingale!.rounds.count - 1].outcome = true
-            martingale!.gameNumber = gameCount
-          }
-        } 
-      }
-    }
-    gamePieces.append(Game(gameNum: gameCount, piece: spinPiece!))
-    roundCount = roundCount + 1
   }
-  fibonacciSimulation.append(fibonacci!)
-  fibonacci = nil
-
-  martingaleSimulation.append(martingale!)
-  martingale = nil
 }
+// fibonacciSimulation.append(fibonacci!)
+// fibonacci = nil
 
-for f: Fibonacci in fibonacciSimulation {
-  print(f.description())
-}
+// martingaleSimulation.append(martingale!)
+// martingale = nil
+
+// for f: Fibonacci in fibonacciSimulation {
+//   print(f.description())
+// }
 
 let csvWriter: CSVWriter = CSVWriter()
 
@@ -302,19 +294,20 @@ csvWriter.writeCSV(to: "bet.csv", content: betCsv)
 
 let gameHeaders: [String] = ["value", "color"]
 let gameCsv: String = csvWriter.createCSV(from: gamePieces, using: gameHeaders) { game in
-  return ["\(game.gameNum)", "\(game.piece.value)", game.piece.color]
+  return ["\(game.roundNumber)", "\(game.piece.value)", game.piece.color]
 }
-csvWriter.writeCSV(to: "game.csv", content: gameCsv)
+csvWriter.writeCSV(to: "spins.csv", content: gameCsv)
 
-let fibonacciHeaders: [String] = ["game", "rounds", "profit"]
-let fibonacciCsv: String = csvWriter.createCSV(from: fibonacciSimulation, using: fibonacciHeaders) { fibonacci in
-  return ["\(fibonacci.gameNumber)", "\(fibonacci.rounds.count)", "\(fibonacci.profit - fibonacci.startingWallet)"]
-}
-csvWriter.writeCSV(to: "fibonacci.csv", content: fibonacciCsv)
 
-let martingaleHeaders: [String] = ["game", "rounds", "profit"]
-let martingaleCsv: String = csvWriter.createCSV(from: martingaleSimulation, using: martingaleHeaders) { martingale in
-  return ["\(martingale.gameNumber)", "\(martingale.rounds.count)", "\(martingale.profit - martingale.startingWallet)"]
-}
-csvWriter.writeCSV(to: "martingale.csv", content: martingaleCsv)
+// let fibonacciHeaders: [String] = ["game", "rounds", "profit"]
+// let fibonacciCsv: String = csvWriter.createCSV(from: fibonacciSimulation, using: fibonacciHeaders) { fibonacci in
+//   return ["\(fibonacci.gameNumber)", "\(fibonacci.rounds.count)", "\(fibonacci.profit - fibonacci.startingWallet)"]
+// }
+// csvWriter.writeCSV(to: "fibonacci.csv", content: fibonacciCsv)
+
+// let martingaleHeaders: [String] = ["game", "rounds", "profit"]
+// let martingaleCsv: String = csvWriter.createCSV(from: martingaleSimulation, using: martingaleHeaders) { martingale in
+//   return ["\(martingale.gameNumber)", "\(martingale.rounds.count)", "\(martingale.profit - martingale.startingWallet)"]
+// }
+// csvWriter.writeCSV(to: "martingale.csv", content: martingaleCsv)
 

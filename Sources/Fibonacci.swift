@@ -1,44 +1,36 @@
 class Fibonacci: Strategy {
 
-  let startingFibonacciNum1: Int = 2
-  let startingFibonacciNum2: Int = 3
-
   override func description() -> String {
-    return ("round number: \(self.rounds.last!.roundNumber), wallet: \(self.wallet), profit: \(self.profit), outcome: \(self.rounds.last!.outcome), amount bet: \(self.rounds.last!.bet.amountBet)")
+    return ("")
   }
-  override func makeBet(roundNumber: Int) {
+  override func makeBet(bets: inout [Bet], wallet: inout Int) {
 
-    var nextFibonacciNumber: Int
+    // this strategy calls for betting on red every time
+    var reds: [Bet] = betPlacements.filter{ $0.name == "reds" }
 
-    var currentFibonacciNum1: Int
-    var currentFibonacciNum2: Int
-
-    if (self.rounds.isEmpty || self.rounds.last!.outcome == true) {
-       nextFibonacciNumber = generateNextFibonacci(num1: startingFibonacciNum1, num2: startingFibonacciNum2)
-    } else {
-      if (self.rounds.count == 1 || (self.rounds.count > 1 && self.rounds[rounds.count - 2].outcome == true)) {  // make the second number 3, means win then loss
-        currentFibonacciNum1 = 3
-      } else { // means two losses in a row
-        currentFibonacciNum1 = self.rounds[rounds.count - 2].bet.amountBet
-      }
-      currentFibonacciNum2 = self.rounds.last!.bet.amountBet
-      nextFibonacciNumber = generateNextFibonacci(num1: currentFibonacciNum1, num2: currentFibonacciNum2)
-
-    }
-    
-    let usableBets: [BetPlacement] = betPlacements.filter { $0.name == "reds" }
-
-    if !usableBets.isEmpty {
-      for var bet: BetPlacement in usableBets {
-        bet.amountBet = nextFibonacciNumber
-        self.rounds.append(Round(roundNumber: roundNumber, bet: bet, outcome: false))
-        self.wallet = self.wallet - nextFibonacciNumber
+    if !bets.isEmpty { 
+      for bet: Bet in bets {
+        for affectedPiece: Piece in bet.affectedPieces {
+          if (affectedPiece.color == prevRound.piece.color && affectedPiece.value == prevRound.piece.value) {
+            reds[0].amountBet = generateNextFibonacci(prevNum: bet.amountBet)
+            wallet = wallet - reds[0].amountBet
+            bets = reds
+          }
+        }
       }
     }
   }
 
-  func generateNextFibonacci(num1: Int, num2: Int) -> Int {
-    return num1 + num2
+  func generateNextFibonacci(prevNum: Int) -> Int {
+    var num1: Int = 2
+    var num2: Int = 3
+    var temp: Int = 0
+    while(num1 + num2 != prevNum) {
+       temp = num2
+       num2 = num1 + num2
+       num1 = temp
+    }
+    return prevNum + num2
   }
 
 }
