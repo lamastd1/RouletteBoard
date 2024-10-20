@@ -8,6 +8,9 @@ class Fibonacci: Strategy {
     // this strategy calls for betting on red every time and creates a copy of the default red bet
     var reds: [Bet] = betPlacements.filter{ $0.name == "reds" }
 
+    if (forcedBetAmount == -5) {
+      return false
+    }
     if (forcedBetAmount != -1) {
       print("FBA: \(forcedBetAmount)")
       reds[0].amountBet = forcedBetAmount
