@@ -5,19 +5,25 @@ class Fibonacci: Strategy {
   }
   override func makeBet(bets: inout [Bet], wallet: inout Int) {
 
-    // this strategy calls for betting on red every time
+    // this strategy calls for betting on red every time and creates a copy of the default red bet
     var reds: [Bet] = betPlacements.filter{ $0.name == "reds" }
 
     if !bets.isEmpty { 
       for bet: Bet in bets {
-        for affectedPiece: Piece in bet.affectedPieces {
-          if (affectedPiece.color == prevRound.piece.color && affectedPiece.value == prevRound.piece.value) {
-            reds[0].amountBet = generateNextFibonacci(prevNum: bet.amountBet)
-            wallet = wallet - reds[0].amountBet
-            bets = reds
-          }
+        var prevOutcomeWin: Bool = false
+        if (wonBet(bet: bet, prev: true) == true) {
+          reds[0].amountBet = 5
+          bets = reds
+          prevOutcomeWin = true
+        }
+        if (prevOutcomeWin == false && bets[0].amountBet != 0) {
+          reds[0].amountBet = generateNextFibonacci(prevNum: bets[0].amountBet)
+          bets = reds
         }
       }
+    } else {
+      reds[0].amountBet = 5
+      bets = reds
     }
   }
 

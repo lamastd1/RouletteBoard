@@ -17,4 +17,19 @@ class Strategy {
   func description() -> String {
     return ""
   }
+
+  func wonBet(bet: Bet, prev: Bool) -> Bool {
+    for affectedPiece: Piece in bet.affectedPieces {
+      if (prev == true) {
+        if (affectedPiece.color == prevRound.piece.color && affectedPiece.value == prevRound.piece.value) {
+          return true
+        }
+      } else {
+        if (affectedPiece.color == currRound.piece.color && affectedPiece.value == currRound.piece.value) {
+          return true
+        }
+      }
+    }
+    return false
+  }
 }

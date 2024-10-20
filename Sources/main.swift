@@ -224,20 +224,15 @@ let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (
 // var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
 // var fibonacciSimulation: [Fibonacci] = []
 // var martingaleSimulation: [Martingale] = []
-var gamePieces: [Round] = []
+var gameRounds: [Round] = []
 
-var roundCount: Int = 1 
+var roundNumber: Int = 1 
 // var fibonacci: Fibonacci? = Fibonacci(gameNumber: 0, rounds: [], increaseOnWin: false)
 // var martingale: Martingale? = Martingale(gameNumber: 0, rounds: [], increaseOnWin: false)
 
-while(roundCount < 100 + 1) {
+var players: [Player] = []
 
-  // if (fibonacci!.wallet > 0) {
-  //   fibonacci!.makeBet(roundNumber: roundCount)
-  // }
-  // if (martingale!.wallet > 0) {
-  //   martingale!.makeBet(roundNumber: roundCount)
-  // }
+while(roundNumber < 500 + 1) {
 
   let spinNumber: Int = Int.random(in: 1...38)
   var spinPiece: Piece?
@@ -249,25 +244,75 @@ while(roundCount < 100 + 1) {
     return false
   }) {
     if let piece: Piece = spinPiece {
-      gamePieces.append(Round(roundNumber: roundCount, piece: piece))
-      roundCount = roundCount + 1
-    //   if (fibonacci!.wallet > 0 && fibonacci!.rounds.count > 0) {
-    //     if ( fibonacci!.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
-    //       fibonacci!.profit = fibonacci!.profit + ( fibonacci!.rounds.last!.bet.amountBet * ( fibonacci!.rounds.last!.bet.payout - 1))
-    //       fibonacci!.wallet = fibonacci!.wallet +  fibonacci!.rounds.last!.bet.amountBet
-    //       fibonacci!.rounds[fibonacci!.rounds.count - 1].outcome = true
-    //     }
-    //   } 
-    //   if (martingale!.wallet > 0 && martingale!.rounds.count > 0) {
-    //     if ( martingale!.rounds.last!.bet.affectedPieces.contains(where: { $0.value == piece.value && $0.color == piece.color })) {
-    //       martingale!.profit = martingale!.profit + ( martingale!.rounds.last!.bet.amountBet * ( martingale!.rounds.last!.bet.payout - 1))
-    //       martingale!.wallet = martingale!.wallet +  martingale!.rounds.last!.bet.amountBet
-    //       martingale!.rounds[martingale!.rounds.count - 1].outcome = true
-    //     }
-    //   } 
+
+      // add the round
+      var prevRound: Round
+      if (gameRounds.count > 0) {
+        prevRound = gameRounds.last!
+      } else {
+        prevRound = Round(roundNumber: -1, piece: pieces[0])
+      }
+      let currRound: Round = Round(roundNumber: roundNumber, piece: piece)
+      gameRounds.append(currRound)
+
+      for player: Player in players {
+        player.strategy.prevRound = prevRound
+        player.strategy.currRound = currRound
+        var sum: Int = 0
+        for bet: Bet in player.bets {
+          sum = sum + bet.amountBet
+        }
+        if (player.wallet - sum > sum) {
+          player.makeBet()
+        } else {
+          print("player wallet \(player.wallet), sum: \(sum)")
+          player.bets = []
+        }
+      }
+
+      let playerEntryNumber: Int = Int.random(in: 1...100)
+      // if (playerEntryNumber == 11 && roundNumber < 400) {
+      if (roundNumber == 3) {
+        let randomNames: [String] = ["Rick", "Carl", "Lauri", "Herschel", "Michonne", "Daryl", "Glenn", "Maggie", "Negan", "Carol", "Beth", "Judith", "Abraham", "Eugene", "Sasha", "Rosita", "Tara", "Merle", "Shane", "Andrea", "Dwight", "Gabriel", "Henry", "Jesus", "Alpha", "Beta", "Joe", "T-Dog"]
+        let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
+        let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
+
+        let nameIndex: Int = Int.random(in: 0...randomNames.count - 1)
+        let startingWalletIndex: Int = Int.random(in: 0...randomStartingWallet.count - 1)
+        let maxRoundsIndex: Int = Int.random(in: 0...randomMaxRounds.count - 1)
+        
+        let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
+
+        players.append(Player(name: randomNames[nameIndex], startingWallet: randomStartingWallet[startingWalletIndex], maxRounds: randomMaxRounds[maxRoundsIndex], strategy: fibonacci, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
+      }
+      for player: Player in players {
+        if (player.wallet > 4 && player.bets.count > 0) {
+          print("Round Num: \(roundNumber), description: \(piece.description)")
+          for bet: Bet in player.bets {
+            print("Round Num: \(roundNumber), Amount Bet: \(player.bets[0].amountBet)")
+            if (player.strategy.wonBet(bet: bet, prev: false) == true) {
+              player.profit = player.profit + (bet.amountBet * (bet.payout - 1))
+              player.strategy.prevRound = currRound
+            } else {
+              player.wallet = player.wallet - bet.amountBet
+            }
+          }
+          for player: Player in players {
+            print("Round Num: \(roundNumber), Name: \(player.name), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit)")
+          }
+          print()
+        }
+      }
+      if (roundNumber == 3 || roundNumber == 4 || roundNumber == 500) {
+      }
+      roundNumber = roundNumber + 1
     }
   }
 }
+// print(players.count)
+// for player: Player in players {
+//   print("Name: \(player.name), Wallet: \(player.wallet), Profit: \(player.profit)")
+// }
 // fibonacciSimulation.append(fibonacci!)
 // fibonacci = nil
 
@@ -293,10 +338,10 @@ let betCsv: String = csvWriter.createCSV(from: betPlacements, using: betHeaders)
 csvWriter.writeCSV(to: "bet.csv", content: betCsv)
 
 let gameHeaders: [String] = ["value", "color"]
-let gameCsv: String = csvWriter.createCSV(from: gamePieces, using: gameHeaders) { game in
+let gameCsv: String = csvWriter.createCSV(from: gameRounds, using: gameHeaders) { game in
   return ["\(game.roundNumber)", "\(game.piece.value)", game.piece.color]
 }
-csvWriter.writeCSV(to: "spins.csv", content: gameCsv)
+csvWriter.writeCSV(to: "rounds.csv", content: gameCsv)
 
 
 // let fibonacciHeaders: [String] = ["game", "rounds", "profit"]
