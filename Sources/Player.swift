@@ -1,6 +1,5 @@
 class Player {
   var id: Int
-  var name: String
   var startingWallet: Int
   var maxRounds: Int
   var strategy: Strategy
@@ -9,9 +8,8 @@ class Player {
   var wallet: Int
   var profit: Int
 
-  init(id: Int, name: String, startingWallet: Int, maxRounds: Int, strategy: Strategy, rounds: [Round], bets: [Bet], wallet: Int, profit: Int) {
+  init(id: Int, startingWallet: Int, maxRounds: Int, strategy: Strategy, rounds: [Round], bets: [Bet], wallet: Int, profit: Int) {
     self.id = id
-    self.name = name
     self.startingWallet = startingWallet
     self.maxRounds = maxRounds
     self.strategy = strategy
@@ -21,8 +19,8 @@ class Player {
     self.profit = profit
   }
 
-  func makeBet() {
-    strategy.makeBet(bets: &self.bets, wallet: &self.wallet)
+  func makeBet(roundNumber: Int) -> Bool {
+    return (strategy.makeBet(bets: &self.bets, wallet: self.wallet, roundNumber: roundNumber))
   }
 
   // func getAverageBet() {

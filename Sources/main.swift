@@ -21,13 +21,15 @@ struct Bet: CustomStringConvertible {
   var odds: Float
   var payout: Int
   var affectedPieces: [Piece] = []
+  var roundNumber: Int 
   var amountBet: Int
 
-  init(name: String, odds: Float, payout: Int, affectedPieces: [Piece], amountBet: Int = 0) {
+  init(name: String, odds: Float, payout: Int, affectedPieces: [Piece], roundNumber: Int = 0, amountBet: Int = 0) {
     self.name = name
     self.odds = odds
     self.payout = payout
     self.affectedPieces = affectedPieces
+    self.roundNumber = roundNumber
     self.amountBet = amountBet
   }
 
@@ -256,60 +258,63 @@ while(roundNumber < 500 + 1) {
       let currRound: Round = Round(roundNumber: roundNumber, piece: piece)
       gameRounds.append(currRound)
 
-      for player: Player in activePlayers {
-        player.strategy.prevRound = prevRound
-        player.strategy.currRound = currRound
-        var sum: Int = 0
-        for bet: Bet in player.bets {
-          sum = sum + bet.amountBet
-        }
-        if (player.wallet > sum) {
-          player.makeBet()
-        } else {
-          print("player wallet \(player.wallet), sum: \(sum)")
-          player.profit = player.profit + player.wallet
-          player.wallet = 0
-          player.bets = []
-        }
-      }
-
       // loop through the active players looking for inactive players
       let leavingPlayers: [Player] = activePlayers.filter { $0.wallet == 0 } 
       inactivePlayers.append(contentsOf: leavingPlayers)      
       activePlayers.removeAll { $0.wallet == 0 }                   
 
-      let playerEntryNumber: Int = Int.random(in: 1...100)
+      // let playerEntryNumber: Int = Int.random(in: 1...100)
       // if (playerEntryNumber == 11 && roundNumber < 400) {
       if (roundNumber == 3) {
-        let randomNames: [String] = ["Rick", "Carl", "Lauri", "Herschel", "Michonne", "Daryl", "Glenn", "Maggie", "Negan", "Carol", "Beth", "Judith", "Abraham", "Eugene", "Sasha", "Rosita", "Tara", "Merle", "Shane", "Andrea", "Dwight", "Gabriel", "Henry", "Jesus", "Alpha", "Beta", "Joe", "T-Dog"]
-        let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
+        // let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
+        let randomStartingWallet: [Int] = [75]
         let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
 
-        let nameIndex: Int = Int.random(in: 0...randomNames.count - 1)
         let startingWalletIndex: Int = Int.random(in: 0...randomStartingWallet.count - 1)
         let maxRoundsIndex: Int = Int.random(in: 0...randomMaxRounds.count - 1)
         
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
 
-        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), name: randomNames[nameIndex], startingWallet: randomStartingWallet[startingWalletIndex], maxRounds: randomMaxRounds[maxRoundsIndex], strategy: fibonacci, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
+        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), startingWallet: randomStartingWallet[startingWalletIndex], maxRounds: randomMaxRounds[maxRoundsIndex], strategy: fibonacci, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
       }
+
       for player: Player in activePlayers {
-        if (player.wallet > 4 && player.bets.count > 0) {
-          print("Round Num: \(roundNumber), description: \(piece.description)")
-          for bet: Bet in player.bets {
-            print("Round Num: \(roundNumber), Amount Bet: \(player.bets[0].amountBet)")
+        player.strategy.prevRound = prevRound
+        player.strategy.currRound = currRound
+        let canPlayerBet: Bool = player.makeBet(roundNumber: roundNumber)
+        if (canPlayerBet == false) {
+          print("player wallet: \(player.wallet)")
+          player.profit = player.profit + player.wallet - player.startingWallet
+          player.wallet = 0
+          player.bets = []
+        }
+      }
+
+      for player: Player in activePlayers {
+        for i: Int in stride(from: player.bets.count - 1, through: 0, by: -1) {
+          let bet: Bet = player.bets[i]
+          if (bet.roundNumber == roundNumber) {
+            print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
             if (player.strategy.wonBet(bet: bet, prev: false) == true) {
               player.profit = player.profit + (bet.amountBet * (bet.payout - 1))
-              player.strategy.prevRound = currRound
             } else {
               player.wallet = player.wallet - bet.amountBet
             }
+          } else {
+            break
           }
-          for player: Player in activePlayers {
-            print("Round Num: \(roundNumber), Name: \(player.name), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit)")
-          }
-          print()
         }
+        for player: Player in activePlayers {
+          print(piece.description)
+          print("Round Num: \(roundNumber), Player Id \(player.id), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit)")
+          // print()
+          // for i: Int in stride(from: player.bets.count - 1, through: 0, by: -1) {
+          //   let bet: Bet = player.bets[i]
+          //   print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
+          // }
+        }
+        print()
+        print()
       }
       if (roundNumber == 3 || roundNumber == 4 || roundNumber == 500) {
       }
@@ -352,9 +357,9 @@ let gameCsv: String = csvWriter.createCSV(from: gameRounds, using: gameHeaders) 
 csvWriter.writeCSV(to: "rounds.csv", content: gameCsv)
 
 
-let playerHeaders: [String] = ["id", "name", "starting wallet", "strategy", "number of rounds", "profit"]
+let playerHeaders: [String] = ["id", "starting wallet", "strategy", "number of rounds", "profit"]
 let peopleCsv: String = csvWriter.createCSV(from: inactivePlayers, using: playerHeaders) { player in
-  return ["\(player.id)", "\(player.name)", "\(player.startingWallet)", "\(player.strategy)", "\(player.rounds.count)", "\(player.profit)"]
+  return ["\(player.id)", "\(player.startingWallet)", "\(player.strategy)", "\(player.rounds.count)", "\(player.profit)"]
 }
 csvWriter.writeCSV(to: "people.csv", content: peopleCsv)
 
@@ -363,4 +368,3 @@ csvWriter.writeCSV(to: "people.csv", content: peopleCsv)
 //   return ["\(martingale.gameNumber)", "\(martingale.rounds.count)", "\(martingale.profit - martingale.startingWallet)"]
 // }
 // csvWriter.writeCSV(to: "martingale.csv", content: martingaleCsv)
-

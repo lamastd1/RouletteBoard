@@ -10,8 +10,8 @@ class Strategy {
     self.increaseOnWin = increaseOnWin
   }
 
-  func makeBet(bets: inout [Bet], wallet: inout Int) {
-    
+  func makeBet(bets: inout [Bet], wallet: Int, roundNumber: Int) -> Bool {
+    return true
   }
 
   func description() -> String {
