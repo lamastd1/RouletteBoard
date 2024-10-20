@@ -23,14 +23,16 @@ struct Bet: CustomStringConvertible {
   var affectedPieces: [Piece] = []
   var roundNumber: Int 
   var amountBet: Int
+  var force: Bool
 
-  init(name: String, odds: Float, payout: Int, affectedPieces: [Piece], roundNumber: Int = 0, amountBet: Int = 0) {
+  init(name: String, odds: Float, payout: Int, affectedPieces: [Piece], roundNumber: Int = 0, amountBet: Int = 0, force: Bool = false) {
     self.name = name
     self.odds = odds
     self.payout = payout
     self.affectedPieces = affectedPieces
     self.roundNumber = roundNumber
     self.amountBet = amountBet
+    self.force = force
   }
 
   var description: String {
@@ -260,43 +262,79 @@ while(roundNumber < 500 + 1) {
 
       // loop through the active players looking for inactive players
       let leavingPlayers: [Player] = activePlayers.filter { $0.wallet == 0 } 
+      for player: Player in leavingPlayers {
+        if (player.wallet > 0) {
+          player.profit = player.profit + player.wallet - player.startingWallet
+          player.wallet = 0
+        }
+      }
       inactivePlayers.append(contentsOf: leavingPlayers)      
-      activePlayers.removeAll { $0.wallet == 0 }                   
-
+      activePlayers.removeAll { $0.wallet == 0 }   
+  
       // let playerEntryNumber: Int = Int.random(in: 1...100)
       // if (playerEntryNumber == 11 && roundNumber < 400) {
       if (roundNumber == 3) {
         // let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
         let randomStartingWallet: [Int] = [75]
-        let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
+        // let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
+        let randomMaxRounds: [Int] = [-1]
+        // let randomScaredWinnerSeed: Int = Int.random(in: 1...100)
+        let randomSoreLoserSeed: Int = Int.random(in: 1...100)
+        let ranodmImpatientLoserSeed: Int = Int.random(in: 1...100)
+        let randomAddictSeed: Int = Int.random(in: 1...100)
 
         let startingWalletIndex: Int = Int.random(in: 0...randomStartingWallet.count - 1)
         let maxRoundsIndex: Int = Int.random(in: 0...randomMaxRounds.count - 1)
         
+        // let scaredWinner: Bool = (randomScaredWinnerSeed < 6) ? false : false
+        let soreLoser: Bool = (randomSoreLoserSeed < 11) ? true : false
+        let impatientLoser: Bool = (ranodmImpatientLoserSeed < 4 && !soreLoser) ? true : false
+        let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : false
+        
+        
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
 
-        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), startingWallet: randomStartingWallet[startingWalletIndex], maxRounds: randomMaxRounds[maxRoundsIndex], strategy: fibonacci, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
+        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), startingWallet: randomStartingWallet[startingWalletIndex], strategy: fibonacci, maxRounds: randomMaxRounds[maxRoundsIndex], /*scaredWinner: scaredWinner,*/ soreLoser: soreLoser, impatientLoser: impatientLoser, addict: addict, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
       }
 
       for player: Player in activePlayers {
         player.strategy.prevRound = prevRound
         player.strategy.currRound = currRound
-        let canPlayerBet: Bool = player.makeBet(roundNumber: roundNumber)
-        if (canPlayerBet == false) {
-          print("player wallet: \(player.wallet)")
+        if (player.maxRounds == player.rounds.count || player.soreLoser && player.determineConsecutiveOutcome(numRounds: 3, outcome: false) == true) {
           player.profit = player.profit + player.wallet - player.startingWallet
           player.wallet = 0
-          player.bets = []
+        }
+
+        var forcedBetAmount: Int = -1
+        if (player.impatientLoser && player.determineConsecutiveOutcome(numRounds: 3, outcome: false) == true) {
+          // go all in
+          print("TIME")
+          forcedBetAmount = player.wallet
+        }
+        var canPlayerBet: Bool = player.makeBet(roundNumber: roundNumber, forcedBetAmount: forcedBetAmount)
+        if (canPlayerBet == false) {
+          if (player.addict && player.profit > 0 && player.profit < player.startingWallet) {
+            player.wallet = player.wallet + player.profit
+            player.profit = 0
+            canPlayerBet = player.makeBet(roundNumber: roundNumber, forcedBetAmount: forcedBetAmount)
+          }
+          if(canPlayerBet == false) {
+            player.profit = player.profit + player.wallet - player.startingWallet
+            player.wallet = 0
+          }
         }
       }
 
       for player: Player in activePlayers {
+        player.rounds.append(currRound)
         for i: Int in stride(from: player.bets.count - 1, through: 0, by: -1) {
           let bet: Bet = player.bets[i]
           if (bet.roundNumber == roundNumber) {
             print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
             if (player.strategy.wonBet(bet: bet, prev: false) == true) {
+              print("recieving payout, old prfit: \(player.profit), ", terminator: "")
               player.profit = player.profit + (bet.amountBet * (bet.payout - 1))
+              print("new profit: \(player.profit)")
             } else {
               player.wallet = player.wallet - bet.amountBet
             }
@@ -307,14 +345,12 @@ while(roundNumber < 500 + 1) {
         for player: Player in activePlayers {
           print(piece.description)
           print("Round Num: \(roundNumber), Player Id \(player.id), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit)")
-          // print()
+          print()
           // for i: Int in stride(from: player.bets.count - 1, through: 0, by: -1) {
           //   let bet: Bet = player.bets[i]
           //   print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
           // }
         }
-        print()
-        print()
       }
       if (roundNumber == 3 || roundNumber == 4 || roundNumber == 500) {
       }
@@ -357,9 +393,9 @@ let gameCsv: String = csvWriter.createCSV(from: gameRounds, using: gameHeaders) 
 csvWriter.writeCSV(to: "rounds.csv", content: gameCsv)
 
 
-let playerHeaders: [String] = ["id", "starting wallet", "strategy", "number of rounds", "profit"]
+let playerHeaders: [String] = ["id", "starting wallet", "strategy", "number of rounds", "average bet", "sore loser", "impatient loser", "addict", "profit"]
 let peopleCsv: String = csvWriter.createCSV(from: inactivePlayers, using: playerHeaders) { player in
-  return ["\(player.id)", "\(player.startingWallet)", "\(player.strategy)", "\(player.rounds.count)", "\(player.profit)"]
+  return ["\(player.id)", "\(player.startingWallet)", "\(player.strategy)", "\(player.rounds.count)", "\(player.getAverageBet())", "\(player.soreLoser)", "\(player.impatientLoser)", "\(player.addict)", "\(player.profit)"]
 }
 csvWriter.writeCSV(to: "people.csv", content: peopleCsv)
 
