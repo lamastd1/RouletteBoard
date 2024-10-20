@@ -230,7 +230,8 @@ var roundNumber: Int = 1
 // var fibonacci: Fibonacci? = Fibonacci(gameNumber: 0, rounds: [], increaseOnWin: false)
 // var martingale: Martingale? = Martingale(gameNumber: 0, rounds: [], increaseOnWin: false)
 
-var players: [Player] = []
+var activePlayers: [Player] = []
+var inactivePlayers: [Player] = []
 
 while(roundNumber < 500 + 1) {
 
@@ -255,20 +256,27 @@ while(roundNumber < 500 + 1) {
       let currRound: Round = Round(roundNumber: roundNumber, piece: piece)
       gameRounds.append(currRound)
 
-      for player: Player in players {
+      for player: Player in activePlayers {
         player.strategy.prevRound = prevRound
         player.strategy.currRound = currRound
         var sum: Int = 0
         for bet: Bet in player.bets {
           sum = sum + bet.amountBet
         }
-        if (player.wallet - sum > sum) {
+        if (player.wallet > sum) {
           player.makeBet()
         } else {
           print("player wallet \(player.wallet), sum: \(sum)")
+          player.profit = player.profit + player.wallet
+          player.wallet = 0
           player.bets = []
         }
       }
+
+      // loop through the active players looking for inactive players
+      let leavingPlayers: [Player] = activePlayers.filter { $0.wallet == 0 } 
+      inactivePlayers.append(contentsOf: leavingPlayers)      
+      activePlayers.removeAll { $0.wallet == 0 }                   
 
       let playerEntryNumber: Int = Int.random(in: 1...100)
       // if (playerEntryNumber == 11 && roundNumber < 400) {
@@ -283,9 +291,9 @@ while(roundNumber < 500 + 1) {
         
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
 
-        players.append(Player(name: randomNames[nameIndex], startingWallet: randomStartingWallet[startingWalletIndex], maxRounds: randomMaxRounds[maxRoundsIndex], strategy: fibonacci, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
+        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), name: randomNames[nameIndex], startingWallet: randomStartingWallet[startingWalletIndex], maxRounds: randomMaxRounds[maxRoundsIndex], strategy: fibonacci, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
       }
-      for player: Player in players {
+      for player: Player in activePlayers {
         if (player.wallet > 4 && player.bets.count > 0) {
           print("Round Num: \(roundNumber), description: \(piece.description)")
           for bet: Bet in player.bets {
@@ -297,7 +305,7 @@ while(roundNumber < 500 + 1) {
               player.wallet = player.wallet - bet.amountBet
             }
           }
-          for player: Player in players {
+          for player: Player in activePlayers {
             print("Round Num: \(roundNumber), Name: \(player.name), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit)")
           }
           print()
@@ -309,8 +317,8 @@ while(roundNumber < 500 + 1) {
     }
   }
 }
-// print(players.count)
-// for player: Player in players {
+// print(activePlayers.count)
+// for player: Player in activePlayers {
 //   print("Name: \(player.name), Wallet: \(player.wallet), Profit: \(player.profit)")
 // }
 // fibonacciSimulation.append(fibonacci!)
@@ -344,11 +352,11 @@ let gameCsv: String = csvWriter.createCSV(from: gameRounds, using: gameHeaders) 
 csvWriter.writeCSV(to: "rounds.csv", content: gameCsv)
 
 
-// let fibonacciHeaders: [String] = ["game", "rounds", "profit"]
-// let fibonacciCsv: String = csvWriter.createCSV(from: fibonacciSimulation, using: fibonacciHeaders) { fibonacci in
-//   return ["\(fibonacci.gameNumber)", "\(fibonacci.rounds.count)", "\(fibonacci.profit - fibonacci.startingWallet)"]
-// }
-// csvWriter.writeCSV(to: "fibonacci.csv", content: fibonacciCsv)
+let playerHeaders: [String] = ["id", "name", "starting wallet", "strategy", "number of rounds", "profit"]
+let peopleCsv: String = csvWriter.createCSV(from: inactivePlayers, using: playerHeaders) { player in
+  return ["\(player.id)", "\(player.name)", "\(player.startingWallet)", "\(player.strategy)", "\(player.rounds.count)", "\(player.profit)"]
+}
+csvWriter.writeCSV(to: "people.csv", content: peopleCsv)
 
 // let martingaleHeaders: [String] = ["game", "rounds", "profit"]
 // let martingaleCsv: String = csvWriter.createCSV(from: martingaleSimulation, using: martingaleHeaders) { martingale in
