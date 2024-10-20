@@ -274,10 +274,8 @@ while(roundNumber < 1000 + 1) {
   
       let playerEntryNumber: Int = Int.random(in: 1...100)
       if (playerEntryNumber < 6 && roundNumber < 400) {
-        // let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
-        let randomStartingWallet: [Int] = [75]
-        // let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
-        let randomMaxRounds: [Int] = [-1]
+        let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
+        let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
         // let randomScaredWinnerSeed: Int = Int.random(in: 1...100)
         let randomSoreLoserSeed: Int = Int.random(in: 1...100)
         let ranodmImpatientLoserSeed: Int = Int.random(in: 1...100)
@@ -287,9 +285,9 @@ while(roundNumber < 1000 + 1) {
         let maxRoundsIndex: Int = Int.random(in: 0...randomMaxRounds.count - 1)
         
         // let scaredWinner: Bool = (randomScaredWinnerSeed < 6) ? false : false
-        let soreLoser: Bool = (randomSoreLoserSeed < 11) ? false : false
-        let impatientLoser: Bool = (ranodmImpatientLoserSeed < 4 && !soreLoser) ? false : false
-        let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : true     
+        let soreLoser: Bool = (randomSoreLoserSeed < 11) ? true : false
+        let impatientLoser: Bool = (ranodmImpatientLoserSeed < 4 && !soreLoser) ? true : false
+        let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : false     
         
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
 
