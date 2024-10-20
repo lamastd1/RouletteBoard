@@ -237,7 +237,7 @@ var roundNumber: Int = 1
 var activePlayers: [Player] = []
 var inactivePlayers: [Player] = []
 
-while(roundNumber < 100 + 1) {
+while(roundNumber < 1000 + 1) {
 
   let spinNumber: Int = Int.random(in: 1...38)
   var spinPiece: Piece?
@@ -273,8 +273,8 @@ while(roundNumber < 100 + 1) {
       activePlayers.removeAll { $0.wallet == 0 }   
   
       let playerEntryNumber: Int = Int.random(in: 1...100)
-      // if (playerEntryNumber < 6 && roundNumber < 400) {
-      if (roundNumber == 3) {
+      if (playerEntryNumber < 6 && roundNumber < 400) {
+      // if (roundNumber == 3) {
         let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
         let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
         // let randomScaredWinnerSeed: Int = Int.random(in: 1...100)
@@ -292,7 +292,7 @@ while(roundNumber < 100 + 1) {
         
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
         let martingale: Martingale = Martingale(prevRound: prevRound, currRound: currRound, increaseOnWin: true)
-        let strategies: [Strategy] = [martingale]
+        let strategies: [Strategy] = [fibonacci, martingale]
         let startingStrategy: Int = Int.random(in: 0...strategies.count - 1)
 
 
