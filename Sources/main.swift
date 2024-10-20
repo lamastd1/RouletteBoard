@@ -237,7 +237,7 @@ var roundNumber: Int = 1
 var activePlayers: [Player] = []
 var inactivePlayers: [Player] = []
 
-while(roundNumber < 1000 + 1) {
+while(roundNumber < 100 + 1) {
 
   let spinNumber: Int = Int.random(in: 1...38)
   var spinPiece: Piece?
@@ -273,7 +273,8 @@ while(roundNumber < 1000 + 1) {
       activePlayers.removeAll { $0.wallet == 0 }   
   
       let playerEntryNumber: Int = Int.random(in: 1...100)
-      if (playerEntryNumber < 6 && roundNumber < 400) {
+      // if (playerEntryNumber < 6 && roundNumber < 400) {
+      if (roundNumber == 3) {
         let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
         let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
         // let randomScaredWinnerSeed: Int = Int.random(in: 1...100)
@@ -287,11 +288,15 @@ while(roundNumber < 1000 + 1) {
         // let scaredWinner: Bool = (randomScaredWinnerSeed < 6) ? false : false
         let soreLoser: Bool = (randomSoreLoserSeed < 11) ? true : false
         let impatientLoser: Bool = (ranodmImpatientLoserSeed < 4 && !soreLoser) ? true : false
-        let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : false     
+        let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : false
         
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
+        let martingale: Martingale = Martingale(prevRound: prevRound, currRound: currRound, increaseOnWin: true)
+        let strategies: [Strategy] = [martingale]
+        let startingStrategy: Int = Int.random(in: 0...strategies.count - 1)
 
-        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), startingWallet: randomStartingWallet[startingWalletIndex], strategy: fibonacci, maxRounds: randomMaxRounds[maxRoundsIndex], /*scaredWinner: scaredWinner,*/ soreLoser: soreLoser, impatientLoser: impatientLoser, addict: addict, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
+
+        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), startingWallet: randomStartingWallet[startingWalletIndex], strategy: strategies[startingStrategy], maxRounds: randomMaxRounds[maxRoundsIndex], /*scaredWinner: scaredWinner,*/ soreLoser: soreLoser, impatientLoser: impatientLoser, addict: addict, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
       }
 
       var forcedBetAmount: Int = -1
@@ -331,9 +336,9 @@ while(roundNumber < 1000 + 1) {
           if (bet.roundNumber == roundNumber) {
             // print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
             if (player.strategy.wonBet(bet: bet, prev: false) == true) {
-              print("recieving payout, old prfit: \(player.profit), ", terminator: "")
+              // print("recieving payout, old prfit: \(player.profit), ", terminator: "")
               player.profit = player.profit + (bet.amountBet * (bet.payout - 1))
-              print("new profit: \(player.profit)")
+              // print("new profit: \(player.profit)")
             } else {
               player.wallet = player.wallet - bet.amountBet
               if (player.impatientLoser && player.wallet == 0 && player.bets.last!.force == true) {
@@ -344,21 +349,32 @@ while(roundNumber < 1000 + 1) {
             break
           }
         }
-        print(piece.description)
-        for player: Player in activePlayers {
-          print("Round Num: \(roundNumber), Player Id \(player.id), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit)")
-          // for i: Int in stride(from: player.bets.count - 1, through: 0, by: -1) {
-          //   let bet: Bet = player.bets[i]
-          //   print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
-          // }
-        }
       }
-      if (roundNumber == 3 || roundNumber == 4 || roundNumber == 500) {
+      if (activePlayers.count > 0) {
+        print("RoundNumber \(roundNumber) Menu: ")
+        print("Spun Piece for the round: \(piece.description)")
+        for player: Player in activePlayers {
+          print("Round Num: \(roundNumber), Player Id \(player.id), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit), player max rounds: \(player.maxRounds), Player Strategy: \(player.strategy)")
+          for i: Int in stride(from: player.bets.count - 1, through: (player.bets.count > 1) ? player.bets.count - 2 : 0, by: -1) {
+            let bet: Bet = player.bets[i]
+            print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
+          }
+          print()
+        }
       }
       roundNumber = roundNumber + 1
     }
   }
 }
+
+for player: Player in activePlayers {
+  if (player.wallet > 0) {
+    player.profit = player.profit + player.wallet - player.startingWallet
+    player.wallet = 0
+  }
+}
+inactivePlayers.append(contentsOf: activePlayers)      
+activePlayers.removeAll()
 // print(activePlayers.count)
 // for player: Player in activePlayers {
 //   print("Name: \(player.name), Wallet: \(player.wallet), Profit: \(player.profit)")

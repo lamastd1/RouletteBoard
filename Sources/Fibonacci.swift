@@ -12,7 +12,6 @@ class Fibonacci: Strategy {
       return false
     }
     if (forcedBetAmount != -1) {
-      print("FBA: \(forcedBetAmount)")
       reds[0].amountBet = forcedBetAmount
       reds[0].roundNumber = roundNumber
       reds[0].force = true
