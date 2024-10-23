@@ -314,6 +314,7 @@ while(roundNumber < 10 + 1) {
         let sixtyFour: SixtyFour = SixtyFour(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
         let martingale: Martingale = Martingale(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
         let minimumNetGain: MinimumNetGain = MinimumNetGain(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
+        let FourCorners: FourCorners = FourCorners(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
         let strategies: [Strategy] = [martingale]
         let startingStrategy: Int = Int.random(in: 0...strategies.count - 1)
 
