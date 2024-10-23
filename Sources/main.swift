@@ -267,15 +267,9 @@ func getLeavingPlayers() -> [Player] {
   return (leavingPlayers)
 }
 
-while(roundNumber < 10 + 1) {
+while(roundNumber < 1000 + 1) {
 
-  var spinNumber: Int = Int.random(in: 1...38)
-  if (gameRounds.count % 5 != 0) {
-    spinNumber = 5
-  } else {
-    spinNumber = 4
-  }
-  // let spinNumber = 5
+  let spinNumber: Int = Int.random(in: 1...38)
   var spinPiece: Piece?
   if pieces.contains(where: {
     if $0.value == spinNumber {
@@ -295,13 +289,13 @@ while(roundNumber < 10 + 1) {
       inactivePlayers.append(contentsOf: leavingPlayers)      
       activePlayers.removeAll { $0.wallet == 0 }   
   
-      let playerEntryNumber: Int = Int.random(in: 1...4)
-      // if (playerEntryNumber < 2 && roundNumber < 400) {
-      if (roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1) {
-        // let randomStartingWallet: [Int] = [25, 50, 75, 100, 200, 300, 400, 500, 1000, 2000, 3000, 5000, 10000]
-        let randomStartingWallet: [Int] = [20]
-        // let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 1000]
-        let randomMaxRounds: [Int] = [10000]
+      let playerEntryNumber: Int = Int.random(in: 1...10)
+      if (playerEntryNumber > 9) {
+      // if (roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1) {
+        let randomStartingWallet: [Int] = [50, 100, 200, 300, 400, 500, 750, 1000, 2000, 3000, 5000, 10000]
+        // let randomStartingWallet: [Int] = [20]
+        let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 500]
+        // let randomMaxRounds: [Int] = [10000]
         // let randomScaredWinnerSeed: Int = Int.random(in: 1...100)
         let randomSoreLoserSeed: Int = Int.random(in: 1...100)
         let ranodmImpatientLoserSeed: Int = Int.random(in: 1...100)
@@ -311,13 +305,13 @@ while(roundNumber < 10 + 1) {
         let maxRoundsIndex: Int = Int.random(in: 0...randomMaxRounds.count - 1)
         
         // let scaredWinner: Bool = (randomScaredWinnerSeed < 6) ? false : false
-        let soreLoser: Bool = (randomSoreLoserSeed < 11) ? false : false
-        let impatientLoser: Bool = (ranodmImpatientLoserSeed < 4 && !soreLoser) ? false : false
-        let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : true
+        let soreLoser: Bool = (randomSoreLoserSeed < 11) ? true : false
+        let impatientLoser: Bool = (ranodmImpatientLoserSeed < 4 && !soreLoser) ? true : false
+        let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : false
         
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
         let martingale: Martingale = Martingale(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
-        let strategies: [Strategy] = [martingale]
+        let strategies: [Strategy] = [fibonacci, martingale]
         let startingStrategy: Int = Int.random(in: 0...strategies.count - 1)
 
 
@@ -460,9 +454,9 @@ let gameCsv: String = csvWriter.createCSV(from: gameRounds, using: gameHeaders) 
 csvWriter.writeCSV(to: "rounds.csv", content: gameCsv)
 
 
-let playerHeaders: [String] = ["id", "starting wallet", "strategy", "number of rounds", "average bet", "sore loser", "impatient loser", "addict", "profit"]
+let playerHeaders: [String] = ["id", "starting wallet", "strategy", "max rounds", "starting round", "ending round", "average bet", "sore loser", "impatient loser", "addict", "profit"]
 let peopleCsv: String = csvWriter.createCSV(from: inactivePlayers, using: playerHeaders) { player in
-  return ["\(player.id)", "\(player.startingWallet)", "\(player.strategy)", "\(player.rounds.count)", "\(player.getAverageBet())", "\(player.soreLoser)", "\(player.impatientLoser)", "\(player.addict)", "\(player.profit)"]
+  return ["\(player.id)", "\(player.startingWallet)", "\(player.strategy)", "\(player.maxRounds)", "\(player.rounds[0].roundNumber)", "\(player.rounds.last!.roundNumber)", "\(player.getAverageBet())", "\(player.soreLoser)", "\(player.impatientLoser)", "\(player.addict)", "\(player.profit)"]
 }
 csvWriter.writeCSV(to: "people.csv", content: peopleCsv)
 
