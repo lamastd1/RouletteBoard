@@ -1,4 +1,4 @@
-class Martingale: Strategy {
+class MinimumNetGain: Strategy {
 
   override func description() -> String {
     return ("")
@@ -28,17 +28,20 @@ class Martingale: Strategy {
             prevOutcomeWin = true
           }
           if (wonBet(bet: bet, prev: true) == true) {
+            print("won last time, getting the minimum")
             reds[0].amountBet = 5
             reds[0].roundNumber = roundNumber
             prevOutcomeWin = true
           }
           if (prevOutcomeWin == false && bets[0].amountBet != 0) {
-            reds[0].amountBet = generateNextMartingale(num1: bet.amountBet)
+            print("lost last time, escalating bet")
+            reds[0].amountBet = generateNextMinimumNetGain(prevNum: bet.amountBet)
             reds[0].roundNumber = roundNumber
           }
         }
       }
     } else {
+      print("starting minimum bet")
       reds[0].amountBet = 5
       reds[0].roundNumber = roundNumber
     }
@@ -50,7 +53,11 @@ class Martingale: Strategy {
     }
   }
 
-  func generateNextMartingale(num1: Int) -> Int {
-    return num1 * 2
+  func generateNextMinimumNetGain(prevNum: Int) -> Int {
+    if prevNum == 5 {
+        return 6
+    } else {
+        return prevNum * 2
+    }
   }
 }

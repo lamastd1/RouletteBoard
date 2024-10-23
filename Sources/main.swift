@@ -227,12 +227,12 @@ let lengthsPerPayout: [Int : Int] = Dictionary(uniqueKeysWithValues: [(2, 18), (
 
 // var fibonacci: Fibonacci = Fibonacci(rounds: [], increaseOnWin: false)
 // var fibonacciSimulation: [Fibonacci] = []
-// var martingaleSimulation: [Martingale] = []
+// var rideTheWaveSimulation: [RideTheWave] = []
 var gameRounds: [Round] = []
 
 var roundNumber: Int = 1 
 // var fibonacci: Fibonacci? = Fibonacci(gameNumber: 0, rounds: [], increaseOnWin: false)
-// var martingale: Martingale? = Martingale(gameNumber: 0, rounds: [], increaseOnWin: false)
+// var rideTheWave: RideTheWave? = RideTheWave(gameNumber: 0, rounds: [], increaseOnWin: false)
 
 var activePlayers: [Player] = []
 var inactivePlayers: [Player] = []
@@ -267,7 +267,7 @@ func getLeavingPlayers() -> [Player] {
   return (leavingPlayers)
 }
 
-while(roundNumber < 1000 + 1) {
+while(roundNumber < 10 + 1) {
 
   let spinNumber: Int = Int.random(in: 1...38)
   var spinPiece: Piece?
@@ -290,8 +290,8 @@ while(roundNumber < 1000 + 1) {
       activePlayers.removeAll { $0.wallet == 0 }   
   
       let playerEntryNumber: Int = Int.random(in: 1...10)
-      if (playerEntryNumber > 9) {
-      // if (roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1) {
+      // if (playerEntryNumber > 9) {
+      if (roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1) {
         let randomStartingWallet: [Int] = [50, 100, 200, 300, 400, 500, 750, 1000, 2000, 3000, 5000, 10000]
         // let randomStartingWallet: [Int] = [20]
         let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 500]
@@ -310,8 +310,11 @@ while(roundNumber < 1000 + 1) {
         let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : false
         
         let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
+        let rideTheWave: RideTheWave = RideTheWave(prevRound: prevRound, currRound: currRound, increaseOnWin: true)
+        let sixtyFour: SixtyFour = SixtyFour(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
         let martingale: Martingale = Martingale(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
-        let strategies: [Strategy] = [fibonacci, martingale]
+        let minimumNetGain: MinimumNetGain = MinimumNetGain(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
+        let strategies: [Strategy] = [martingale]
         let startingStrategy: Int = Int.random(in: 0...strategies.count - 1)
 
 
@@ -376,15 +379,18 @@ while(roundNumber < 1000 + 1) {
         }
         for i: Int in stride(from: player.bets.count - 1, through: 0, by: -1) {
           let bet: Bet = player.bets[i]
+          print("Bet Round Num: \(bet.roundNumber), roundNumber: \(roundNumber)")
           if (bet.roundNumber == roundNumber) {
-            // print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
+            print("Round Num: \(bet.roundNumber), Name of Bet: \(bet.name), Amount Bet: \(bet.amountBet)")
             if (player.strategy.wonBet(bet: bet, prev: false) == true) {
               // print("recieving payout, old prfit: \(player.profit), ", terminator: "")
               print("roundNumber \(roundNumber) player id: \(player.id) won")
               player.profit = player.profit + (bet.amountBet * (bet.payout - 1))
               // print("new profit: \(player.profit)")
             } else {
+              print("roundNumber \(roundNumber) player id: \(player.id) lost")
               player.wallet = player.wallet - bet.amountBet
+              print("roundNumber \(roundNumber) player wallet left: \(player.wallet) after losing")
               if (player.impatientLoser && player.wallet == 0 && player.bets.last!.force == true) {
                 player.profit = player.profit - player.startingWallet
               }
@@ -426,8 +432,8 @@ activePlayers.removeAll()
 // fibonacciSimulation.append(fibonacci!)
 // fibonacci = nil
 
-// martingaleSimulation.append(martingale!)
-// martingale = nil
+// rideTheWaveSimulation.append(rideTheWave!)
+// rideTheWave = nil
 
 // for f: Fibonacci in fibonacciSimulation {
 //   print(f.description())
@@ -460,8 +466,8 @@ let peopleCsv: String = csvWriter.createCSV(from: inactivePlayers, using: player
 }
 csvWriter.writeCSV(to: "people.csv", content: peopleCsv)
 
-// let martingaleHeaders: [String] = ["game", "rounds", "profit"]
-// let martingaleCsv: String = csvWriter.createCSV(from: martingaleSimulation, using: martingaleHeaders) { martingale in
-//   return ["\(martingale.gameNumber)", "\(martingale.rounds.count)", "\(martingale.profit - martingale.startingWallet)"]
+// let rideTheWaveHeaders: [String] = ["game", "rounds", "profit"]
+// let rideTheWaveCsv: String = csvWriter.createCSV(from: rideTheWaveSimulation, using: rideTheWaveHeaders) { rideTheWave in
+//   return ["\(rideTheWave.gameNumber)", "\(rideTheWave.rounds.count)", "\(rideTheWave.profit - rideTheWave.startingWallet)"]
 // }
-// csvWriter.writeCSV(to: "martingale.csv", content: martingaleCsv)
+// csvWriter.writeCSV(to: "rideTheWave.csv", content: rideTheWaveCsv)

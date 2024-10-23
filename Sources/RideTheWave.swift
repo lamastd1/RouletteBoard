@@ -1,4 +1,4 @@
-class Martingale: Strategy {
+class RideTheWave: Strategy {
 
   override func description() -> String {
     return ("")
@@ -23,17 +23,19 @@ class Martingale: Strategy {
       for bet: Bet in bets {
         if (bet.roundNumber == roundNumber - 1) {
           var prevOutcomeWin: Bool = false
-          if (bet.force == true) {
-            print("bet force is true")
-            prevOutcomeWin = true
+          if (bet.force == true) { // this is the previous bet
+            return false
           }
           if (wonBet(bet: bet, prev: true) == true) {
-            reds[0].amountBet = 5
+            reds[0].amountBet = generateNextRideTheWave(num1: bet.amountBet)
+            if (reds[0].amountBet > wallet) {
+              reds[0].amountBet = wallet
+            }
             reds[0].roundNumber = roundNumber
             prevOutcomeWin = true
           }
-          if (prevOutcomeWin == false && bets[0].amountBet != 0) {
-            reds[0].amountBet = generateNextMartingale(num1: bet.amountBet)
+          if (prevOutcomeWin == false) {
+            reds[0].amountBet = 5
             reds[0].roundNumber = roundNumber
           }
         }
@@ -44,13 +46,14 @@ class Martingale: Strategy {
     }
     if (reds[0].amountBet < wallet) {
       bets.append(reds[0])
+       print("roundNumber: \(roundNumber), bet: \(reds[0].amountBet)")
       return true
     } else {
       return false
     }
   }
 
-  func generateNextMartingale(num1: Int) -> Int {
+  func generateNextRideTheWave(num1: Int) -> Int {
     return num1 * 2
   }
 }
