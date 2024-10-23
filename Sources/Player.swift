@@ -34,10 +34,14 @@ class Player {
   }
 
   func getAverageBet() -> Int {
+    print("------------checking bet----------")
     var sum: Int = 0
     for bet: Bet in bets {
       sum = sum + bet.amountBet
+      print("sum so far \(sum)")
     }
+    print("average bet: \(sum / rounds.count)")
+    print("-------------end of checking bet----------")
     return (sum / rounds.count)
   }
 
