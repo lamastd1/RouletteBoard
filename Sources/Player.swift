@@ -77,6 +77,17 @@ class Player {
     if (self.strategy.betSequence.count == 1 && self.strategy.betSequence[0].bets.count == 1) {
       newBet.append(self.strategy.betSequence[0].bets[0])
     } else {
+      if (self.strategy.betSequence.count > 1 && k > 0) {
+        print(self.strategy.bettingStyle)
+        print(self.strategy.betSequence[0].description)
+        print(self.strategy.betSequence[1].description)
+        for sequence in self.strategy.betSequence {
+          print("consecutive wins: \(sequence.consecutiveWins), k: \(k), count: \(self.strategy.betSequence.count)")
+          for bet in sequence.bets {
+            print("bet name \(bet.name) bet amount \(bet.amountBet)")
+          }
+        }
+      }
       let usedBetSequences = self.strategy.betSequence.filter { $0.consecutiveWins == (k % (self.strategy.betSequence.count)) }[0]
       for bet: Bet in usedBetSequences.bets {
         newBet.append(bet)
