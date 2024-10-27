@@ -24,8 +24,9 @@ struct Bet: CustomStringConvertible {
   var roundNumber: Int 
   var amountBet: Int
   var force: Bool
+  var outcome: String
 
-  init(name: String, odds: Float, payout: Int, affectedPieces: [Piece], roundNumber: Int = 0, amountBet: Int = 0, force: Bool = false) {
+  init(name: String, odds: Float, payout: Int, affectedPieces: [Piece], roundNumber: Int = 0, amountBet: Int = 0, force: Bool = false, outcome: String = "unknown") {
     self.name = name
     self.odds = odds
     self.payout = payout
@@ -33,6 +34,7 @@ struct Bet: CustomStringConvertible {
     self.roundNumber = roundNumber
     self.amountBet = amountBet
     self.force = force
+    self.outcome = outcome
   }
 
   var description: String {
@@ -43,6 +45,27 @@ struct Bet: CustomStringConvertible {
     descriptionString = descriptionString.dropLast().dropLast() + "\n  Amount Bet: \(amountBet)  }\n}"
     return descriptionString
   }
+}
+
+struct BetSequence: CustomStringConvertible {
+  var bets: [Bet]
+  var consecutiveWins: Int
+
+  init (bets: [Bet], consecutiveWins: Int) {
+    self.bets = bets
+    self.consecutiveWins = consecutiveWins
+  }
+
+  var description: String {
+    var descriptionString: String = "{\n  bets: {\n"
+    for bet: Bet in bets {
+      descriptionString = "{\n  Name: \(bet.name),\n Odds: \(bet.odds),\n  Payout: \(bet.payout),\n  affectedPieces: {\n"
+      descriptionString = descriptionString.dropLast().dropLast() + "\n  Amount Bet: \(bet.amountBet)  }\n}"
+      return descriptionString
+    }
+    descriptionString = descriptionString.dropLast().dropLast() + "\n  consectiveWins: \(consecutiveWins)  }\n}"
+    return descriptionString
+  } 
 }
 
 struct Piece: CustomStringConvertible {
@@ -267,9 +290,15 @@ func getLeavingPlayers() -> [Player] {
   return (leavingPlayers)
 }
 
-while(roundNumber < 10 + 1) {
+while(roundNumber < 1000 + 1) {
 
   let spinNumber: Int = Int.random(in: 1...38)
+  // var spinNumber: Int
+  // if (roundNumber % 3 != 0) {
+  //   spinNumber = 4
+  // } else {
+  //   spinNumber = 3
+  // }
   var spinPiece: Piece?
   if pieces.contains(where: {
     if $0.value == spinNumber {
@@ -290,9 +319,9 @@ while(roundNumber < 10 + 1) {
       activePlayers.removeAll { $0.wallet == 0 }   
   
       let playerEntryNumber: Int = Int.random(in: 1...10)
-      // if (playerEntryNumber > 9) {
-      if (roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1) {
-        let randomStartingWallet: [Int] = [50, 100, 200, 300, 400, 500, 750, 1000, 2000, 3000, 5000, 10000]
+      if (playerEntryNumber > 9) {
+      // if (roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1) {
+        let randomStartingWallet: [Int] = [100, 200, 300, 400, 500, 750, 1000, 2000, 3000, 5000, 10000]
         // let randomStartingWallet: [Int] = [20]
         let randomMaxRounds: [Int] = [-1, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 500]
         // let randomMaxRounds: [Int] = [10000]
@@ -309,49 +338,270 @@ while(roundNumber < 10 + 1) {
         let impatientLoser: Bool = (ranodmImpatientLoserSeed < 4 && !soreLoser) ? true : false
         let addict: Bool = (randomAddictSeed < 21 && !soreLoser && !impatientLoser) ? true : false
         
-        let fibonacci: Fibonacci = Fibonacci(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
-        let rideTheWave: RideTheWave = RideTheWave(prevRound: prevRound, currRound: currRound, increaseOnWin: true)
-        let sixtyFour: SixtyFour = SixtyFour(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
-        let martingale: Martingale = Martingale(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
-        let minimumNetGain: MinimumNetGain = MinimumNetGain(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
-        let FourCorners: FourCorners = FourCorners(prevRound: prevRound, currRound: currRound, increaseOnWin: false)
-        let strategies: [Strategy] = [martingale]
-        let startingStrategy: Int = Int.random(in: 0...strategies.count - 1)
+        let reds: [Bet] = betPlacements.filter{ $0.name == "reds" }
 
+        let lowerThird: [Bet] = betPlacements.filter{ $0.name == "lowerThird" }
+        let middleThird: [Bet] = betPlacements.filter{ $0.name == "middleThird" }
 
-        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), startingWallet: randomStartingWallet[startingWalletIndex], strategy: strategies[startingStrategy], maxRounds: randomMaxRounds[maxRoundsIndex], /*scaredWinner: scaredWinner,*/ soreLoser: soreLoser, impatientLoser: impatientLoser, addict: addict, rounds: [], bets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
+        let bet6: [Bet] = betPlacements.filter{ $0.name == "16-17-18-19-20-21" }
+        let bet5: [Bet] = betPlacements.filter{ $0.name == "0-00-1-2-3" }
 
-        print("roundNumber \(roundNumber) player id: \(activePlayers.last!.id) is joining")
+        let bottomLeftCorner: [Bet] = betPlacements.filter{ $0.name == "1-2-4-5" }
+        let bottomRightCorner: [Bet] = betPlacements.filter{ $0.name == "4-5-7-8" }
+        let topLeftCorner: [Bet] = betPlacements.filter{ $0.name == "2-3-5-6" }
+        let topRightCorner: [Bet] = betPlacements.filter{ $0.name == "5-6-8-9" }
+
+        let bet1: [Bet] = betPlacements.filter{ $0.name == "11" }
+        
+        var betSequenceFibonacci1: [BetSequence] = [BetSequence(bets: reds, consecutiveWins: 0)]
+        betSequenceFibonacci1[0].bets[0].amountBet = 5
+        betSequenceFibonacci1[0].consecutiveWins = 0
+
+        var betSequenceFibonacci2: [BetSequence] = [BetSequence(bets: reds, consecutiveWins: 0)]
+        betSequenceFibonacci2[0].bets[0].amountBet = 13
+        betSequenceFibonacci2[0].consecutiveWins = 0
+
+         var betSequenceFibonacci3: [BetSequence] = [BetSequence(bets: lowerThird, consecutiveWins: 0)]
+        betSequenceFibonacci3[0].bets[0].amountBet = 5
+        betSequenceFibonacci3[0].consecutiveWins = 0
+
+        var betSequenceFibonacci4: [BetSequence] = [BetSequence(bets: lowerThird, consecutiveWins: 0)]
+        betSequenceFibonacci4[0].bets[0].amountBet = 13
+        betSequenceFibonacci4[0].consecutiveWins = 0
+
+        var betSequenceFibonacci5: [BetSequence] = [BetSequence(bets: bet6, consecutiveWins: 0)]
+        betSequenceFibonacci5[0].bets[0].amountBet = 5
+        betSequenceFibonacci5[0].consecutiveWins = 0
+
+        var betSequenceFibonacci6: [BetSequence] = [BetSequence(bets: bet6, consecutiveWins: 0)]
+        betSequenceFibonacci6[0].bets[0].amountBet = 13
+        betSequenceFibonacci6[0].consecutiveWins = 0
+
+        var betSequenceFibonacci7: [BetSequence] = [BetSequence(bets: bet5, consecutiveWins: 0)]
+        betSequenceFibonacci7[0].bets[0].amountBet = 5
+        betSequenceFibonacci7[0].consecutiveWins = 0
+
+        var betSequenceFibonacci8: [BetSequence] = [BetSequence(bets: bet5, consecutiveWins: 0)]
+        betSequenceFibonacci8[0].bets[0].amountBet = 13
+        betSequenceFibonacci8[0].consecutiveWins = 0
+
+        var betSequenceFibonacci9: [BetSequence] = [BetSequence(bets: bottomLeftCorner, consecutiveWins: 0)]
+        betSequenceFibonacci9[0].bets[0].amountBet = 5
+        betSequenceFibonacci9[0].consecutiveWins = 0
+
+        var betSequenceFibonacci10: [BetSequence] = [BetSequence(bets: bottomLeftCorner, consecutiveWins: 0)]
+        betSequenceFibonacci10[0].bets[0].amountBet = 13
+        betSequenceFibonacci10[0].consecutiveWins = 0
+
+        var betSequenceFibonacci11: [BetSequence] = [BetSequence(bets: bet1, consecutiveWins: 0)]
+        betSequenceFibonacci11[0].bets[0].amountBet = 5
+        betSequenceFibonacci11[0].consecutiveWins = 0
+
+        var betSequenceFibonacci12: [BetSequence] = [BetSequence(bets: bet1, consecutiveWins: 0)]
+        betSequenceFibonacci12[0].bets[0].amountBet = 13
+        betSequenceFibonacci12[0].consecutiveWins = 0
+
+        var betSequenceMartingale1: [BetSequence] = [BetSequence(bets: reds, consecutiveWins: 0)]
+        betSequenceMartingale1[0].bets[0].amountBet = 5
+        betSequenceMartingale1[0].consecutiveWins = 0
+
+        var betSequenceMartingale2: [BetSequence] = [BetSequence(bets: reds, consecutiveWins: 0)]
+        betSequenceMartingale2[0].bets[0].amountBet = 25
+        betSequenceMartingale2[0].consecutiveWins = 0
+
+        var betSequenceMartingale3: [BetSequence] = [BetSequence(bets: reds, consecutiveWins: 0)]
+        betSequenceMartingale3[0].bets[0].amountBet = 50
+        betSequenceMartingale3[0].consecutiveWins = 0
+
+        var betSequenceMartingale4: [BetSequence] = [BetSequence(bets: reds, consecutiveWins: 0)]
+        betSequenceMartingale4[0].bets[0].amountBet = 100
+        betSequenceMartingale4[0].consecutiveWins = 0
+
+        var betSequenceMartingale5: [BetSequence] = [BetSequence(bets: lowerThird, consecutiveWins: 0)]
+        betSequenceMartingale5[0].bets[0].amountBet = 5
+        betSequenceMartingale5[0].consecutiveWins = 0
+
+        var betSequenceMartingale6: [BetSequence] = [BetSequence(bets: lowerThird, consecutiveWins: 0)]
+        betSequenceMartingale6[0].bets[0].amountBet = 25
+        betSequenceMartingale6[0].consecutiveWins = 0
+
+        var betSequenceMartingale7: [BetSequence] = [BetSequence(bets: lowerThird, consecutiveWins: 0)]
+        betSequenceMartingale7[0].bets[0].amountBet = 50
+        betSequenceMartingale7[0].consecutiveWins = 0
+
+        var betSequenceMartingale8: [BetSequence] = [BetSequence(bets: lowerThird, consecutiveWins: 0)]
+        betSequenceMartingale8[0].bets[0].amountBet = 100
+        betSequenceMartingale8[0].consecutiveWins = 0
+
+        var betSequenceMartingale9: [BetSequence] = [BetSequence(bets: bet6, consecutiveWins: 0)]
+        betSequenceMartingale9[0].bets[0].amountBet = 5
+        betSequenceMartingale9[0].consecutiveWins = 0
+
+        var betSequenceMartingale10: [BetSequence] = [BetSequence(bets: bet6, consecutiveWins: 0)]
+        betSequenceMartingale10[0].bets[0].amountBet = 25
+        betSequenceMartingale10[0].consecutiveWins = 0
+
+        var betSequenceMartingale11: [BetSequence] = [BetSequence(bets: bet6, consecutiveWins: 0)]
+        betSequenceMartingale11[0].bets[0].amountBet = 50
+        betSequenceMartingale11[0].consecutiveWins = 0
+
+        var betSequenceMartingale12: [BetSequence] = [BetSequence(bets: bet6, consecutiveWins: 0)]
+        betSequenceMartingale12[0].bets[0].amountBet = 100
+        betSequenceMartingale12[0].consecutiveWins = 0
+
+        var betSequenceMartingale13: [BetSequence] = [BetSequence(bets: bet5, consecutiveWins: 0)]
+        betSequenceMartingale13[0].bets[0].amountBet = 5
+        betSequenceMartingale13[0].consecutiveWins = 0
+
+        var betSequenceMartingale14: [BetSequence] = [BetSequence(bets: bet5, consecutiveWins: 0)]
+        betSequenceMartingale14[0].bets[0].amountBet = 25
+        betSequenceMartingale14[0].consecutiveWins = 0
+
+        var betSequenceMartingale15: [BetSequence] = [BetSequence(bets: bet5, consecutiveWins: 0)]
+        betSequenceMartingale15[0].bets[0].amountBet = 50
+        betSequenceMartingale15[0].consecutiveWins = 0
+
+        var betSequenceMartingale16: [BetSequence] = [BetSequence(bets: bet5, consecutiveWins: 0)]
+        betSequenceMartingale16[0].bets[0].amountBet = 100
+        betSequenceMartingale16[0].consecutiveWins = 0
+
+        var betSequenceMartingale17: [BetSequence] = [BetSequence(bets: bottomLeftCorner, consecutiveWins: 0)]
+        betSequenceMartingale17[0].bets[0].amountBet = 5
+        betSequenceMartingale17[0].consecutiveWins = 0
+
+        var betSequenceMartingale18: [BetSequence] = [BetSequence(bets: bottomLeftCorner, consecutiveWins: 0)]
+        betSequenceMartingale18[0].bets[0].amountBet = 25
+        betSequenceMartingale18[0].consecutiveWins = 0
+
+        var betSequenceMartingale19: [BetSequence] = [BetSequence(bets: bottomLeftCorner, consecutiveWins: 0)]
+        betSequenceMartingale19[0].bets[0].amountBet = 50
+        betSequenceMartingale19[0].consecutiveWins = 0
+
+        var betSequenceMartingale20: [BetSequence] = [BetSequence(bets: bottomLeftCorner, consecutiveWins: 0)]
+        betSequenceMartingale20[0].bets[0].amountBet = 100
+        betSequenceMartingale20[0].consecutiveWins = 0
+
+        var betSequenceMartingale21: [BetSequence] = [BetSequence(bets: bet1, consecutiveWins: 0)]
+        betSequenceMartingale21[0].bets[0].amountBet = 5
+        betSequenceMartingale21[0].consecutiveWins = 0
+
+        var betSequenceMartingale22: [BetSequence] = [BetSequence(bets: bet1, consecutiveWins: 0)]
+        betSequenceMartingale22[0].bets[0].amountBet = 25
+        betSequenceMartingale22[0].consecutiveWins = 0
+
+        var betSequenceMartingale23: [BetSequence] = [BetSequence(bets: bet1, consecutiveWins: 0)]
+        betSequenceMartingale23[0].bets[0].amountBet = 50
+        betSequenceMartingale23[0].consecutiveWins = 0
+
+        var betSequenceMartingale24: [BetSequence] = [BetSequence(bets: bet1, consecutiveWins: 0)]
+        betSequenceMartingale24[0].bets[0].amountBet = 100
+        betSequenceMartingale24[0].consecutiveWins = 0
+
+        var betSequenceMinimumNetGain1: [BetSequence] = [BetSequence(bets: reds, consecutiveWins: 0)]
+        betSequenceMinimumNetGain1[0].bets[0].amountBet = 5
+        betSequenceMinimumNetGain1[0].consecutiveWins = 0
+
+        var betSequenceMinimumNetGain2: [BetSequence] = [BetSequence(bets: lowerThird, consecutiveWins: 0)]
+        betSequenceMinimumNetGain2[0].bets[0].amountBet = 5
+        betSequenceMinimumNetGain2[0].consecutiveWins = 0
+
+        var betSequenceMinimumNetGain3: [BetSequence] = [BetSequence(bets: bet6, consecutiveWins: 0)]
+        betSequenceMinimumNetGain3[0].bets[0].amountBet = 5
+        betSequenceMinimumNetGain3[0].consecutiveWins = 0
+
+        var betSequenceMinimumNetGain4: [BetSequence] = [BetSequence(bets: bet5, consecutiveWins: 0)]
+        betSequenceMinimumNetGain4[0].bets[0].amountBet = 5
+        betSequenceMinimumNetGain4[0].consecutiveWins = 0
+
+        var betSequenceMinimumNetGain5: [BetSequence] = [BetSequence(bets: bottomLeftCorner, consecutiveWins: 0)]
+        betSequenceMinimumNetGain5[0].bets[0].amountBet = 5
+        betSequenceMinimumNetGain5[0].consecutiveWins = 0
+
+        var betSequenceMinimumNetGain6: [BetSequence] = [BetSequence(bets: bet1, consecutiveWins: 0)]
+        betSequenceMinimumNetGain6[0].bets[0].amountBet = 5
+        betSequenceMinimumNetGain6[0].consecutiveWins = 0
+
+        let fibonacciStrategies: [Strategy] = [
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci1),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci2),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci3),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci4),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci5),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci6),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci7),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci8),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci9),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci10),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci11),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci12),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci1),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci2),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci3),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci4),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci5),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci6),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci7),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci8),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci9),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci10),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci11),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "fibonacci", betSequence: betSequenceFibonacci12)
+        ]
+
+        let martingaleStrategies: [Strategy] = [
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "martingale", betSequence: betSequenceMartingale1),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "martingale", betSequence: betSequenceMartingale2),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "martingale", betSequence: betSequenceMartingale3),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "martingale", betSequence: betSequenceMartingale4),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "martingale", betSequence: betSequenceMartingale1),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "martingale", betSequence: betSequenceMartingale2),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "martingale", betSequence: betSequenceMartingale3),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "martingale", betSequence: betSequenceMartingale4)
+        ]
+
+        let minimumNetGainStrategies: [Strategy] = [
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: false, bettingStyle: "minimumNetGain", betSequence: betSequenceMinimumNetGain1),
+          Strategy(prevRound: prevRound, currRound: currRound, increaseOnWin: true, bettingStyle: "minimumNetGain", betSequence: betSequenceMinimumNetGain1)
+        ]
+
+        let strategies: [[Strategy]] = [fibonacciStrategies, martingaleStrategies, minimumNetGainStrategies]
+        let startingStrategyType: Int = Int.random(in: 0...strategies.count - 1)
+
+        let startingStrategy: Int = Int.random(in: 0...strategies[startingStrategyType].count - 1) 
+
+        activePlayers.append(Player(id: (activePlayers.count + inactivePlayers.count), startingWallet: randomStartingWallet[startingWalletIndex], strategy: strategies[startingStrategyType][startingStrategy], maxRounds: randomMaxRounds[maxRoundsIndex], /*scaredWinner: scaredWinner,*/ soreLoser: soreLoser, impatientLoser: impatientLoser, addict: addict, rounds: [], playedBets: [], wallet: randomStartingWallet[startingWalletIndex], profit: 0))
+
+        // print("roundNumber \(roundNumber) player id: \(activePlayers.last!.id) is joining")
       }
 
-      for player: Player in activePlayers {
-        print("round number: \(roundNumber), player id: \(player.id), player active wallet: \(player.wallet)")
-      }
+      // for player: Player in activePlayers {
+      //   print("round number: \(roundNumber), player id: \(player.id), player active wallet: \(player.wallet)")
+      // }
 
       for player: Player in activePlayers {
         var forcedBetAmount: Int = -1
-        print("roundNumber \(roundNumber) player id: \(player.id) is playing, player wallet: \(player.wallet)")
+        // print("roundNumber \(roundNumber) player id: \(player.id) is playing, player wallet: \(player.wallet)")
         player.strategy.prevRound = prevRound
         player.strategy.currRound = currRound
-        if ((player.maxRounds == player.rounds.count) || ((player.soreLoser) && (player.determineConsecutiveOutcome(numRounds: 3, outcome: false) == true))) {
-          print("roundNumber \(roundNumber) player id: \(player.id) is leaving")
+        if ((player.maxRounds == player.rounds.count) || ((player.soreLoser) && (player.determineConsecutiveOutcome(outcome: "lost") > 3))) {
+          // print("roundNumber \(roundNumber) player id: \(player.id) is leaving")
           player.profit = player.profit + player.wallet - player.startingWallet
           player.wallet = 0
           forcedBetAmount = -5
           player.willLeave = true
         }
-
-        if (player.impatientLoser && player.determineConsecutiveOutcome(numRounds: 3, outcome: false) == true) {
+        // print("maxrounds avoided")
+        if (player.impatientLoser && player.determineConsecutiveOutcome(outcome: "lost") >= 3) {
           // go all in
-          print("TIME")
+          // print("TIME")
           forcedBetAmount = player.wallet
         }
-
+        // print("imp loser avoided")
         var canPlayerBet: Bool = player.makeBet(roundNumber: roundNumber, forcedBetAmount: forcedBetAmount)
-        print("roundNumber \(roundNumber) player id: \(player.id) is playing, player wallet: \(player.wallet), can player bet? \(canPlayerBet), forced bet amount: \(forcedBetAmount)")
+        // print("roundNumber \(roundNumber) player id: \(player.id) is playing, player wallet: \(player.wallet), can player bet? \(canPlayerBet), forced bet amount: \(forcedBetAmount)")
         if (canPlayerBet == false) {
           if (player.addict && player.profit > 0 && player.profit + player.wallet < player.startingWallet) {
-            print("player is an addict, profit was \(player.profit) but started with \(player.startingWallet)")
+            // print("player is an addict, profit was \(player.profit) but started with \(player.startingWallet)")
             player.wallet = player.wallet + player.profit
             player.profit = 0
             canPlayerBet = player.makeBet(roundNumber: roundNumber, forcedBetAmount: forcedBetAmount)
@@ -365,7 +615,7 @@ while(roundNumber < 10 + 1) {
       }
 
       for player: Player in activePlayers {
-        print("round number: \(roundNumber), player id: \(player.id), player active wallet: \(player.wallet)")
+        // print("round number: \(roundNumber), player id: \(player.id), player active wallet: \(player.wallet)")
       }
 
       leavingPlayers = getLeavingPlayers()
@@ -373,28 +623,30 @@ while(roundNumber < 10 + 1) {
       activePlayers.removeAll { $0.wallet == 0 }  
 
       for player: Player in activePlayers {
-        print("roundNumber \(roundNumber) player id: \(player.id) is getting there bet checked")
-        if (player.bets.count > 0 && player.bets.last!.roundNumber == roundNumber) {
-          // print("roundNumber \(roundNumber) player id: \(player.id) made a bet, bet is \(player.bets.last!.description)")
+        // print("roundNumber \(roundNumber) player id: \(player.id) is getting there bet checked")
+        if (player.playedBets.count > 0 && player.playedBets.last!.roundNumber == roundNumber) {
+          // print("roundNumber \(roundNumber) player id: \(player.id) made a bet, bet is \(player.playedBets.last!.description)")
           player.rounds.append(currRound)
         }
-        for i: Int in stride(from: player.bets.count - 1, through: 0, by: -1) {
-          let bet: Bet = player.bets[i]
-          print("Bet Round Num: \(bet.roundNumber), roundNumber: \(roundNumber)")
-          if (bet.roundNumber == roundNumber) {
-            print("Round Num: \(bet.roundNumber), Name of Bet: \(bet.name), Amount Bet: \(bet.amountBet)")
-            if (player.strategy.wonBet(bet: bet, prev: false) == true) {
+        for i: Int in stride(from: player.playedBets.count - 1, through: 0, by: -1) {
+          // print("Bet Round Num: \(player.playedBets[i].roundNumber), roundNumber: \(roundNumber)")
+          if (player.playedBets[i].roundNumber == roundNumber) {
+            // print("Round Num: \(player.playedBets[i].roundNumber), Name of Bet: \(player.playedBets[i].name), Amount Bet: \(player.playedBets[i].amountBet)")
+            if (player.strategy.wonBet(bet: player.playedBets[i], prev: false) == true) {
               // print("recieving payout, old prfit: \(player.profit), ", terminator: "")
-              print("roundNumber \(roundNumber) player id: \(player.id) won")
-              player.profit = player.profit + (bet.amountBet * (bet.payout - 1))
-              // print("new profit: \(player.profit)")
+              // print("dsvdv roundNumber \(roundNumber) player id: \(player.id) won")
+              player.profit = player.profit + (player.playedBets[i].amountBet * (player.playedBets[i].payout - 1))
+              player.playedBets[i].outcome = "won" 
             } else {
-              print("roundNumber \(roundNumber) player id: \(player.id) lost")
-              player.wallet = player.wallet - bet.amountBet
-              print("roundNumber \(roundNumber) player wallet left: \(player.wallet) after losing")
-              if (player.impatientLoser && player.wallet == 0 && player.bets.last!.force == true) {
+              // print("roundNumber \(roundNumber) player id: \(player.id) lost")
+              player.wallet = player.wallet - player.playedBets[i].amountBet
+              // print("roundNumber \(roundNumber) player wallet left: \(player.wallet) after losing")
+              if (player.impatientLoser && player.wallet == 0 && player.playedBets.last!.force == true) {
                 player.profit = player.profit - player.startingWallet
               }
+              // print("old player.playedBets[i] outcome \(player.playedBets[i].outcome)")
+              player.playedBets[i].outcome = "lost"
+              // print("new player.playedBets[i] outcome \(player.playedBets[i].outcome)")
             }
           } else {
             break
@@ -406,13 +658,14 @@ while(roundNumber < 10 + 1) {
       //   print("Spun Piece for the round: \(piece.description)")
       //   for player: Player in activePlayers {
       //     print("Round Num: \(roundNumber), Player Id \(player.id), Starting Wallet: \(player.startingWallet), Wallet: \(player.wallet), Profit: \(player.profit), player max rounds: \(player.maxRounds), Player Strategy: \(player.strategy)")
-      //     for i: Int in stride(from: player.bets.count - 1, through: (player.bets.count > 1) ? player.bets.count - 2 : 0, by: -1) {
-      //       let bet: Bet = player.bets[i]
+      //     for i: Int in stride(from: player.playedBets.count - 1, through: (player.playedBets.count > 1) ? player.playedBets.count - 2 : 0, by: -1) {
+      //       let bet: Bet = player.playedBets[i]
       //       print("Round Num: \(bet.roundNumber), Amount Bet: \(bet.amountBet)")
       //     }
       //     print()
       //   }
       // }
+      
       roundNumber = roundNumber + 1
     }
   }
@@ -426,6 +679,15 @@ for player: Player in activePlayers {
 }
 inactivePlayers.append(contentsOf: activePlayers)      
 activePlayers.removeAll()
+
+// print("-------- start round number check ---------")
+// for player: Player in inactivePlayers {
+//   print("player starting money \(player.startingWallet)")
+//   for var bet: Bet in player.playedBets {
+//     print("bet amount \(bet.amountBet) bet outcome \(bet.outcome)")
+//   }
+// }
+// print("-------- end round number check ---------")
 // print(activePlayers.count)
 // for player: Player in activePlayers {
 //   print("Name: \(player.name), Wallet: \(player.wallet), Profit: \(player.profit)")
@@ -461,9 +723,9 @@ let gameCsv: String = csvWriter.createCSV(from: gameRounds, using: gameHeaders) 
 csvWriter.writeCSV(to: "rounds.csv", content: gameCsv)
 
 
-let playerHeaders: [String] = ["id", "starting wallet", "strategy", "max rounds", "starting round", "ending round", "average bet", "sore loser", "impatient loser", "addict", "profit"]
+let playerHeaders: [String] = ["id", "starting wallet", "strategy", "increase on win", "max rounds", "starting round", "ending round", "starting bet", "starting bet amount", "average bet", "sore loser", "impatient loser", "addict", "profit"]
 let peopleCsv: String = csvWriter.createCSV(from: inactivePlayers, using: playerHeaders) { player in
-  return ["\(player.id)", "\(player.startingWallet)", "\(player.strategy)", "\(player.maxRounds)", "\(player.rounds[0].roundNumber)", "\(player.rounds.last!.roundNumber)", "\(player.getAverageBet())", "\(player.soreLoser)", "\(player.impatientLoser)", "\(player.addict)", "\(player.profit)"]
+  return ["\(player.id)", "\(player.startingWallet)", "\(player.strategy.bettingStyle)", "\(player.strategy.increaseOnWin)", "\(player.maxRounds)", "\(player.rounds[0].roundNumber)", "\(player.rounds.last!.roundNumber)", "\(player.getDefaultStartingBetNames())", "\(player.getDefaultStartingBetSize())", "\(player.getAverageBet())", "\(player.soreLoser)", "\(player.impatientLoser)", "\(player.addict)", "\(player.profit)"]
 }
 csvWriter.writeCSV(to: "people.csv", content: peopleCsv)
 
