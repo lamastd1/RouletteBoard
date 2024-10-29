@@ -78,9 +78,6 @@ class Player {
       newBet.append(self.strategy.betSequence[0].bets[0])
     } else {
       if (self.strategy.betSequence.count > 1 && k > 0) {
-        print(self.strategy.bettingStyle)
-        print(self.strategy.betSequence[0].description)
-        print(self.strategy.betSequence[1].description)
         for sequence in self.strategy.betSequence {
           print("consecutive wins: \(sequence.consecutiveWins), k: \(k), count: \(self.strategy.betSequence.count)")
           for bet in sequence.bets {
@@ -93,27 +90,19 @@ class Player {
         newBet.append(bet)
       }
     }
-    // this needs to be a filter where the answer is consective wins
-  //  for bet: Bet in playedBets {
-  //     print("3 round number \(roundNumber) bet name \(bet.name) bet size \(bet.amountBet) bet round number \(bet.roundNumber) bet outcome \(bet.outcome)")
-  //   }
-    // print(newBet[0].name)
-    // print("handling force bet")
     let forcedBet: Int = handleForcedBet(forcedBetAmount: forcedBetAmount)
-   // print("handled force bet")
 
     if (forcedBet == 0) {
-      // print("forced bet 0")
       return false
     } else if (forcedBet == 1) {
-      // print("forced bet 1")
       for var bet: Bet in newBet {
         bet.amountBet = forcedBetAmount / newBet.count
         bet.roundNumber = roundNumber
         bet.force = true
+        // print("forcing a bet: \(bet.roundNumber) \(bet.name)")
         playedBets.append(bet)
-        return true
       }
+      return true
     }
 
     if (playedBets.isEmpty) {
@@ -134,7 +123,6 @@ class Player {
     var negativeBetAmounts: Int = 0
     let lastRoundBets: [Bet] = self.playedBets.filter { $0.roundNumber == roundNumber - 1 }
     for bet: Bet in lastRoundBets {
-      // print("sifjdi round num: \(roundNumber) bet num: \(bet.roundNumber) outcome: \(bet.outcome)")
       if (bet.outcome == "won") {
         positiveBetAmounts = positiveBetAmounts + bet.amountBet * bet.payout
       } else if (bet.outcome == "lost") {
@@ -142,13 +130,41 @@ class Player {
       }
       // print("[pos and neg vals] \(positiveBetAmounts) \(negativeBetAmounts)")
     }
+    if (playedBets.last!.force == true) {
+      print("current round number: \(roundNumber)")
+      for bet in newBet {
+        print("new bet: \(bet.name) \(bet.roundNumber)")
+      }
+      for bet in playedBets {
+        print("played bet: \(bet.name) \(bet.roundNumber)")
+      }
+      print()
+    }
     var betsToCopy: [Bet] = []
     for bet: Bet in newBet {
+      if (playedBets.last!.force == true) {
+//        print("Last bet is a force")
+//        print("[bet outcome bet roundnumebr bet name] \(bet.outcome) \(bet.roundNumber) \(bet.name)")
+//        print("[played bet outcome and roundnumebr name] \(playedBets.last!.outcome) \(playedBets.last!.roundNumber) \(playedBets.last!.name)")
+        var forcedBets = playedBets.filter { $0.roundNumber == roundNumber - 1 }
+        var forcedBetsMinus2 = playedBets.filter { $0.name == bet.name }
+//        for bet in forcedBets {
+//          print("right round in forced bets: \(bet.roundNumber)")
+//        }
+//        for bet in forcedBetsMinus2 {
+//          print("right name in round: \(bet.name)")
+//        }
+      }
       var betToCopy: Bet = playedBets.filter { $0.name == bet.name && $0.roundNumber == roundNumber - 1 }[0]
       if ((positiveBetAmounts <= negativeBetAmounts && strategy.increaseOnWin == false) || (positiveBetAmounts > negativeBetAmounts && strategy.increaseOnWin == true)) { // treat this like a overall win
         if (strategy.bettingStyle == "fibonacci") {
-          betToCopy.amountBet = strategy.generateNextFibonacci(prevNum: betToCopy.amountBet)
-          betToCopy.roundNumber = roundNumber
+          if (playedBets.last!.force == true) {
+            betToCopy.amountBet = strategy.generateNextFibonacci(prevNum: self.strategy.betSequence[0].bets[0].amountBet)
+            betToCopy.roundNumber = roundNumber
+          } else {
+            betToCopy.amountBet = strategy.generateNextFibonacci(prevNum: betToCopy.amountBet)
+            betToCopy.roundNumber = roundNumber
+          }
         } else if (strategy.bettingStyle == "martingale") {
           betToCopy.amountBet = strategy.generateNextMartingale(num1: betToCopy.amountBet)
           betToCopy.roundNumber = roundNumber

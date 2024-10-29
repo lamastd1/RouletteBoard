@@ -290,7 +290,11 @@ func getLeavingPlayers() -> [Player] {
   return (leavingPlayers)
 }
 
-while(roundNumber < 1000 + 1) {
+while(roundNumber < 10000 + 1) {
+  
+  if (roundNumber % 500 == 0) {
+    print(roundNumber)
+  }
 
   let spinNumber: Int = Int.random(in: 1...38)
   // var spinNumber: Int
@@ -569,7 +573,11 @@ while(roundNumber < 1000 + 1) {
       //     print()
       //   }
       // }
-      
+//      for player in activePlayers {
+//        for bet in player.playedBets {
+//          print("player id: \(player.id) player wallet: \(player.wallet) player profit: \(player.profit) bet outcome: \(bet.outcome) bet amount: \(bet.amountBet) bet outcome: \(bet.outcome) bet roundNumber \(bet.roundNumber) bet force: \(bet.force) current round: \(roundNumber) piece color \(piece.color) piece value: \(piece.value)")
+//        }
+//      }
       roundNumber = roundNumber + 1
     }
   }
