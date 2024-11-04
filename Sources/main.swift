@@ -292,7 +292,7 @@ func getLeavingPlayers() -> [Player] {
 
 while(roundNumber < 10000 + 1) {
   
-  if (roundNumber % 500 == 0) {
+  if (roundNumber % 1000 == 0) {
     print(roundNumber)
   }
 
@@ -322,8 +322,8 @@ while(roundNumber < 10000 + 1) {
       inactivePlayers.append(contentsOf: leavingPlayers)      
       activePlayers.removeAll { $0.wallet == 0 }   
   
-      let playerEntryNumber: Int = Int.random(in: 1...10)
-      if (playerEntryNumber > 9) {
+      let playerEntryNumber: Int = Int.random(in: 1...5)
+      if (playerEntryNumber > 4 && activePlayers.count < 9 && roundNumber < 9900) {
       // if (roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1 || roundNumber == 1) {
         let randomStartingWallet: [Int] = [100, 200, 300, 400, 500, 750, 1000, 2000, 3000, 5000, 10000]
         // let randomStartingWallet: [Int] = [20]

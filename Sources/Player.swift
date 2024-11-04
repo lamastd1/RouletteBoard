@@ -77,14 +77,14 @@ class Player {
     if (self.strategy.betSequence.count == 1 && self.strategy.betSequence[0].bets.count == 1) {
       newBet.append(self.strategy.betSequence[0].bets[0])
     } else {
-      if (self.strategy.betSequence.count > 1 && k > 0) {
-        for sequence in self.strategy.betSequence {
-          print("consecutive wins: \(sequence.consecutiveWins), k: \(k), count: \(self.strategy.betSequence.count)")
-          for bet in sequence.bets {
-            print("bet name \(bet.name) bet amount \(bet.amountBet)")
-          }
-        }
-      }
+      // if (self.strategy.betSequence.count > 1 && k > 0) {
+        // for sequence in self.strategy.betSequence {
+          // print("consecutive wins: \(sequence.consecutiveWins), k: \(k), count: \(self.strategy.betSequence.count)")
+          // for bet in sequence.bets {
+          //   print("bet name \(bet.name) bet amount \(bet.amountBet)")
+          // }
+        // }
+      // }
       let usedBetSequences = self.strategy.betSequence.filter { $0.consecutiveWins == (k % (self.strategy.betSequence.count)) }[0]
       for bet: Bet in usedBetSequences.bets {
         newBet.append(bet)
@@ -130,16 +130,16 @@ class Player {
       }
       // print("[pos and neg vals] \(positiveBetAmounts) \(negativeBetAmounts)")
     }
-    if (playedBets.last!.force == true) {
-      print("current round number: \(roundNumber)")
-      for bet in newBet {
-        print("new bet: \(bet.name) \(bet.roundNumber)")
-      }
-      for bet in playedBets {
-        print("played bet: \(bet.name) \(bet.roundNumber)")
-      }
-      print()
-    }
+    // if (playedBets.last!.force == true) {
+    //   print("current round number: \(roundNumber)")
+    //   for bet in newBet {
+    //     print("new bet: \(bet.name) \(bet.roundNumber)")
+    //   }
+    //   for bet in playedBets {
+    //     print("played bet: \(bet.name) \(bet.roundNumber)")
+    //   }
+    //   print()
+    // }
     var betsToCopy: [Bet] = []
     for bet: Bet in newBet {
       if (playedBets.last!.force == true) {

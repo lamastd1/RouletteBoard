@@ -8,3 +8,5 @@ DerivedData/
 .netrc
 /.vscode
 *.csv
+/oldCsvFiles
+/CsvFiles
