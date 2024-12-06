@@ -3,22 +3,20 @@ class Player {
   var startingWallet: Int
   var strategy: Strategy
   var maxRounds: Int // number of rounds this person will play at maximum
-  // var scaredWinner: Bool // after 3 consecutive wins, skips the next round
   var soreLoser: Bool // after 3 consecutive losses, quits
   var impatientLoser: Bool // after 3 consecutive losses, goes all in for the strategy they have
   var addict: Bool // when wallet hits 0, if profit is not more than what they started with, switch profit into wallet
-  var rounds: [Round]
-  var playedBets: [Bet]
-  var wallet: Int
-  var profit: Int
-  var willLeave: Bool
+  var rounds: [Round] // array that holds the rounds a player played in
+  var playedBets: [Bet] // holds the bets that the player placed
+  var wallet: Int // holds the players current wallet amount
+  var profit: Int // holds the players profit
+  var willLeave: Bool // true if the player can't continue
 
-  init(id: Int, startingWallet: Int, strategy: Strategy, maxRounds: Int, /*scaredWinner: Bool,*/ soreLoser: Bool, impatientLoser: Bool, addict: Bool, rounds: [Round], playedBets: [Bet], wallet: Int, profit: Int, willLeave: Bool = false) {
+  init(id: Int, startingWallet: Int, strategy: Strategy, maxRounds: Int, soreLoser: Bool, impatientLoser: Bool, addict: Bool, rounds: [Round], playedBets: [Bet], wallet: Int, profit: Int, willLeave: Bool = false) {
     self.id = id
     self.startingWallet = startingWallet
     self.strategy = strategy
     self.maxRounds = maxRounds
-    // self.scaredWinner = scaredWinner
     self.soreLoser = soreLoser
     self.impatientLoser = impatientLoser
     self.addict = addict
@@ -40,51 +38,13 @@ class Player {
   }
 
   func makeBet(roundNumber: Int, forcedBetAmount: Int) -> Bool {
-    
-    //print("starting makebet")
-
-    // for bet: Bet in playedBets {
-    //   print("1 round number \(roundNumber) bet name \(bet.name) bet size \(bet.amountBet) bet round number \(bet.roundNumber) bet outcome \(bet.outcome)")
-    // }
 
     let k: Int = determineConsecutiveOutcome(outcome: "lost") 
-    // // print("k: \(k)")
-    // if (k == 0) {
-    //   var sumBets: Int = 0
-    //   for betSequence: BetSequence in self.strategy.betSequence {
-    //     for bet: Bet in betSequence.bets {
-    //       sumBets = sumBets + bet.amountBet
-    //     }
-    //   }  
-    //   if (sumBets <= wallet) { 
-    //     for betSequence: BetSequence in self.strategy.betSequence {
-    //       for var bet: Bet in betSequence.bets {
-    //         bet.roundNumber = roundNumber
-    //         playedBets.append(bet)
-    //       }
-    //     }  
-    //     return true
-    //   } else {
-    //     return false
-    //   }
-    // }
-
-    // for bet: Bet in playedBets {
-    //   print("2 round number \(roundNumber) bet name \(bet.name) bet size \(bet.amountBet) bet round number \(bet.roundNumber) bet outcome \(bet.outcome)")
-    // }
 
     var newBet: [Bet] = []
     if (self.strategy.betSequence.count == 1 && self.strategy.betSequence[0].bets.count == 1) {
       newBet.append(self.strategy.betSequence[0].bets[0])
     } else {
-      // if (self.strategy.betSequence.count > 1 && k > 0) {
-        // for sequence in self.strategy.betSequence {
-          // print("consecutive wins: \(sequence.consecutiveWins), k: \(k), count: \(self.strategy.betSequence.count)")
-          // for bet in sequence.bets {
-          //   print("bet name \(bet.name) bet amount \(bet.amountBet)")
-          // }
-        // }
-      // }
       let usedBetSequences = self.strategy.betSequence.filter { $0.consecutiveWins == (k % (self.strategy.betSequence.count)) }[0]
       for bet: Bet in usedBetSequences.bets {
         newBet.append(bet)
@@ -99,7 +59,6 @@ class Player {
         bet.amountBet = forcedBetAmount / newBet.count
         bet.roundNumber = roundNumber
         bet.force = true
-        // print("forcing a bet: \(bet.roundNumber) \(bet.name)")
         playedBets.append(bet)
       }
       return true
@@ -113,12 +72,6 @@ class Player {
       return true
     }
 
-   // for bet: Bet in playedBets {
-      // if (bet.roundNumber == roundNumber - 1){
-      //   print("4 round number \(roundNumber) bet name \(bet.name) bet size \(bet.amountBet) bet round number \(bet.roundNumber) bet outcome \(bet.outcome)")
-      // }
-   //  }
-
     var positiveBetAmounts: Int = 0
     var negativeBetAmounts: Int = 0
     let lastRoundBets: [Bet] = self.playedBets.filter { $0.roundNumber == roundNumber - 1 }
@@ -128,33 +81,10 @@ class Player {
       } else if (bet.outcome == "lost") {
         negativeBetAmounts = negativeBetAmounts + bet.amountBet
       }
-      // print("[pos and neg vals] \(positiveBetAmounts) \(negativeBetAmounts)")
     }
-    // if (playedBets.last!.force == true) {
-    //   print("current round number: \(roundNumber)")
-    //   for bet in newBet {
-    //     print("new bet: \(bet.name) \(bet.roundNumber)")
-    //   }
-    //   for bet in playedBets {
-    //     print("played bet: \(bet.name) \(bet.roundNumber)")
-    //   }
-    //   print()
-    // }
+
     var betsToCopy: [Bet] = []
     for bet: Bet in newBet {
-      if (playedBets.last!.force == true) {
-//        print("Last bet is a force")
-//        print("[bet outcome bet roundnumebr bet name] \(bet.outcome) \(bet.roundNumber) \(bet.name)")
-//        print("[played bet outcome and roundnumebr name] \(playedBets.last!.outcome) \(playedBets.last!.roundNumber) \(playedBets.last!.name)")
-        var forcedBets = playedBets.filter { $0.roundNumber == roundNumber - 1 }
-        var forcedBetsMinus2 = playedBets.filter { $0.name == bet.name }
-//        for bet in forcedBets {
-//          print("right round in forced bets: \(bet.roundNumber)")
-//        }
-//        for bet in forcedBetsMinus2 {
-//          print("right name in round: \(bet.name)")
-//        }
-      }
       var betToCopy: Bet = playedBets.filter { $0.name == bet.name && $0.roundNumber == roundNumber - 1 }[0]
       if ((positiveBetAmounts <= negativeBetAmounts && strategy.increaseOnWin == false) || (positiveBetAmounts > negativeBetAmounts && strategy.increaseOnWin == true)) { // treat this like a overall win
         if (strategy.bettingStyle == "fibonacci") {
@@ -194,7 +124,6 @@ class Player {
       } 
       betsToCopy.append(betToCopy)
     }
-    // print("amounts made")
     var sumBets: Int = 0
     for bet: Bet in betsToCopy {
       sumBets = sumBets + bet.amountBet
@@ -235,7 +164,6 @@ class Player {
   }
 
   func determineConsecutiveOutcome(outcome: String) -> Int {
-    // print("determine outcome starting")
     var consecutiveWins: Int = 0
     if (rounds.count == 0) {
       return 0
@@ -244,7 +172,6 @@ class Player {
         let currentBets: [Bet] = playedBets.filter { $0.roundNumber == rounds[i].roundNumber }
         var sumBets: Int = 0
         for bet: Bet in currentBets {
-          // print("bet name \(bet.name) bet outcome \(bet.outcome)")
           if (bet.outcome == outcome) {
             sumBets = bet.amountBet * (bet.payout - 1)
           } else {
@@ -252,14 +179,12 @@ class Player {
           }
         }
         if (sumBets > 0) {
-          // print("sumbets \(sumBets)")
           consecutiveWins = consecutiveWins + 1
         } else {
           break
         }
       }
     }
-    // print("determine outcome ending")
     return consecutiveWins
   }
 }

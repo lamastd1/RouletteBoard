@@ -1,6 +1,7 @@
 import Foundation
 
 class CSVWriter {
+
     // Function to create a CSV string from a generic array of objects
     func createCSV<T>(from data: [T], using headers: [String], valueExtractor: (T) -> [String]) -> String {
         var csvString: String = headers.joined(separator: ",") + "\n" // Add header
@@ -15,6 +16,7 @@ class CSVWriter {
     }
 
   func writeCSV(to filename: String, content: String) {
+    
     // Get the current directory path
     let currentDirectory: String = FileManager.default.currentDirectoryPath
     
